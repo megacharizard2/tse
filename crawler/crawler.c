@@ -12,7 +12,7 @@ assertp(void *p, const char *message)
 {
   if (p == NULL) {
     fprintf(stderr, "MALLOC FAILED: %s\n", message);
-    exit (99);
+    exit(EXIT_FAILURE);
   }
   return p;
 }
