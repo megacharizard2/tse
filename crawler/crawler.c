@@ -104,6 +104,7 @@ void crawler(char* seedURL,int maxdepth,char* dirname){
     bool fetchsuccess=webpage_fetch(page);
     if (fetchsuccess != true){
       printf("could not extract HTML from page %s\n",urlcopy);
+      webpage_delete(page);
       continue;
     }
     logr("Fetched",webpage_getDepth(page),webpage_getURL(page));
