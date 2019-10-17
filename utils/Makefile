@@ -1,0 +1,13 @@
+CFLAGS = -Wall -pedantic -std=c11 -ggdb -I. 
+CC = gcc
+MAKE = make
+
+OFILES= queue.o hash.o webpage.o
+
+all: $(OFILES)
+	ar cr ../lib/libutils.a $(OFILES)
+
+webpage.o: webpage.h
+
+clean:
+	rm -rf webpage.o
