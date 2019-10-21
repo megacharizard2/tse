@@ -17,7 +17,14 @@ $(PROG): $(OBJS) $(LLIBS)
 
 crawler.o: $B/queue.h $B/hash.h $B/webpage.h 
 
+fetchPage.o: $B/queue.h $B/hash.h $B/webpage.h
+
+fetchPage: fetchPage.o $(LLIBS)
+	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+
+
 clean:
 	rm -f $(PROG)
 	rm -f *~ *.o
 	rm -rf *.dSYM
+	rm -f fetchPage
