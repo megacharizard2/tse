@@ -25,3 +25,11 @@ assertp(void *p, const char *message) {
 	}
 	return p;
 }
+
+void indexer() {
+	printf("entering indexer");
+}
+
+int main() {
+	indexer();
+}
