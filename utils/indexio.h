@@ -12,6 +12,7 @@
 
 int loadcrawlerdir(char* dirname,int docid,hashtable_t* ht);
 
+hashtable_t* loadindexfile(FILE* fp);
 
 
 

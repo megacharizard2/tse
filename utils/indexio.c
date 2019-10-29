@@ -58,7 +58,7 @@ static void read_file(FILE *fp,int docid,hashtable_t *ht){
   char *depth=freadlinep(fp);
   char *htmllen=freadlinep(fp); 
   printf("%s\n", htmllen);
-  char *html=freadfilep(fp); 
+  char *html=readrest(fp); 
   if (url != NULL && depth != NULL && html != NULL){
     int dep=atoi(depth);
     webpage_t* webpage=assertp(webpage_new(url,dep,html),"error creating webpage");
@@ -90,4 +90,49 @@ static void read_file(FILE *fp,int docid,hashtable_t *ht){
   free(url);
   free(depth);
   free(htmllen);
+}
+
+hashtable_t* loadindexfile(FILE* fp){
+  hashtable_t* ht=assertp(hopen(900),"hashtable");
+  while (!feof(fp)){
+    char* c=freadlinep(fp);
+    if (c == NULL){
+      break;
+    }
+    char line[strlen(c)+1];
+    for (int x=0;x<=strlen(c);x++){
+      line[x]=c[x];
+    }
+    counters_t *ct=assertp(counters_new(),"counter");
+    int counter=0;
+    char * word;
+    word = strtok (line," ");
+    wrapper_t* wrapper=wrapper_new(word,ct);
+    hput(ht,wrapper,word,strlen(word));
+    wrapper_t* currentwrapper=hsearch(ht,&searchfn,word,strlen(word));
+    counters_t* currentct=wrapper_getcounter(currentwrapper);
+    if (currentct == NULL){
+      continue;
+    }
+    int key;
+    int count;
+    while (word != NULL){
+      counter++;
+      
+      word = strtok (NULL, " ");
+      if (word == NULL){
+        break;
+      }
+      if ((counter%2) == 1){
+        key=atoi(word);
+      }
+      if (counter%2 == 0){
+        count=atoi(word);
+        counters_set(currentct,key,count);
+      }
+    }
+    free(c);
+    
+  }
+  return ht;
 }

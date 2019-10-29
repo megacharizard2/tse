@@ -249,7 +249,7 @@ char *freadlinep(FILE *fp)
 }
 
 /* freadlinep - see readlinep.h for description */
-char *freadfilep(FILE *fp) 
+char *readrest(FILE *fp) 
 {
   // validate the parameter
   if (fp == NULL || feof(fp)) {

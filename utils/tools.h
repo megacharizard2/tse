@@ -35,4 +35,4 @@ void counters_delete(counters_t *ctrs);
 extern char *freadlinep(FILE *fp);
 static inline char *readlinep(void) { return freadlinep(stdin); }
 
-char *freadfilep(FILE *fp);
+char *readrest(FILE *fp);
