@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <queue.h>
+#include <hash.h>
+#include <webpage.h>
+
+int32_t pagesave(webpage_t *page,int id,char* dirnm){
+  char name[12];
+  sprintf(name,"%d",id);
+  char* slash="/";
+  char* dircopy = assertp(malloc(strlen(dirname)+strlen(slash)+strlen(name)+1), "dict copy");
+  strcpy(dircopy,dirname);
+  char *pathname=strcat(dircopy,slash);
+  char *path=strcat(pathname,name);
+  FILE* fp;
+  fp=fopen(path,"w");
+  if (fp == NULL){
+    printf("the file pointer is NULL");
+    return 1;
+  }
+  char *URL=webpage_getURL(page);
+  int depth=webpage_getDepth(page);
+  int htmllen=webpage_getHTMLlen(page);
+  char *HTML=webpage_getHTML(page);
+  fprintf(fp,"%s\n%d\n%d\n%s\n",URL,depth,htmllen,HTML);
+  fclose(fp);
+  free(dircopy);
+  return 0;
+}
