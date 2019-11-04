@@ -8,7 +8,7 @@
 #include <queue.h>
 #include <ctype.h>
 
-static char* NormalizeWord(char* word){
+char* NormalizeWord(char* word){
   char wordarray[strlen(word)+1];
   char* lowered=assertp(malloc(sizeof(wordarray)+1),"allocating space for lowered char*");
   for (int x=0;x<sizeof(wordarray);x++){

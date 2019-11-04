@@ -10,6 +10,8 @@
 #include "queue.h"
 #include <ctype.h>
 
+char* NormalizeWord(char* word);
+
 int loadcrawlerdir(char* dirname,int docid,hashtable_t* ht);
 
 hashtable_t* loadindexfile(FILE* fp);
