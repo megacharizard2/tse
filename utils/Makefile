@@ -14,4 +14,4 @@ hash.o: hash.h
 indexio.o: indexio.h webpage.h tools.h hash.h queue.h
 
 clean:
-	rm -rf webpage.o tools.o queue.o hash.o indexio.o *~
+	rm -rf webpage.o tools.o queue.o hash.o indexio.o locked-queue.o *~
