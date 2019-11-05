@@ -49,10 +49,6 @@ struct twocts {
 void counters_intersect(counters_t* ct1, counters_t* ct2); 
 void intersect_helper(void *arg, const int key, const int count);
 
-static inline int min(const int a, const int b) {
-  return (a < b ? a : b);
-}
-
 void counters_intersect(counters_t* ct1, counters_t* ct2)
 {
   assertp(ct1, "counters 1 invalid");
@@ -65,8 +61,18 @@ void counters_intersect(counters_t* ct1, counters_t* ct2)
 void intersect_helper(void *arg, const int key, const int count)
 {
   struct twocts *two = arg; 
-
-  counters_set(two->result, key, min(count, counters_get(two->another, key)));
+  const int thiscount=count;
+  const int othercount=counters_get(two->another,key);
+  if (thiscount<othercount){
+    counters_set(two->result, key, thiscount);
+  }
+  else if (othercount<thiscount){
+    counters_set(two->result, key, othercount);
+  }
+  else if (othercount == thiscount){
+    counters_set(two->result, key, othercount);
+  }
+  
 }
 
 void counters_union(counters_t* ct1, counters_t* ct2)
@@ -327,6 +333,11 @@ int main(int argc,char* argv[]){
       char* wordarray[arraysize];
       int array_counter=0;
       char* word=strtok(queryfromfile," ");
+      if (word == NULL){
+        printf("word is NULL (empty query)\n");
+        free(queryfromfile);
+        continue;
+      }
       char* fnormalized=NormalizeWord(word); 
       bool fisbadchar=badcharcheck(fnormalized);
       if (fisbadchar == true){
@@ -405,7 +416,12 @@ int main(int argc,char* argv[]){
     int arraysize=300;
     char* wordarray[arraysize];
     int array_counter=0;
-    char* word=strtok(query," ");
+    char* word=strtok(query," \t");
+    if (word == NULL){
+      printf("word is NULL (empty query)\n");
+      free(query);
+      continue;
+    }
     char* fnormalized=NormalizeWord(word); 
     bool fisbadchar=badcharcheck(fnormalized);
     if (fisbadchar == true){
@@ -416,7 +432,7 @@ int main(int argc,char* argv[]){
     wordarray[array_counter]=fnormalized;
     bool isbadchar=false;
     while (word!=NULL){
-      word=strtok(NULL, " ");
+      word=strtok(NULL, " \t");
       if (word == NULL){
         break;
       }
