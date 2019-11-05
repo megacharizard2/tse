@@ -21,7 +21,7 @@ typedef struct lqueue{
 } lqueue_t;
 
 lqueue_t* lqopen(void) {
-	pthred_mutex_init(&m,NULL);
+	pthread_mutex_init(&m,NULL);
 	lqueue_t* lockedQ= malloc(sizeof(lqueue_t*));
 	if (lockedQ == NULL) {
 		return NULL;
