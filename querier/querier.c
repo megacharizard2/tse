@@ -324,8 +324,11 @@ int main(int argc,char* argv[]){
       if (queryfromfile == NULL){
         break;
       }
+      printf("-----------------------------------------------\n");
+      printf("queryfromfile=%s\n",queryfromfile);
       if (queryfromfile[0] == '\0'){
         printf("empty line\n");
+        printf("-----------------------------------------------\n");
         free(queryfromfile);
         continue;
       }
@@ -336,6 +339,7 @@ int main(int argc,char* argv[]){
       if (word == NULL){
         printf("word is NULL (empty query)\n");
         free(queryfromfile);
+        printf("-----------------------------------------------\n");
         continue;
       }
       char* fnormalized=NormalizeWord(word); 
