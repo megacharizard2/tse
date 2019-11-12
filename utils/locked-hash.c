@@ -53,4 +53,18 @@ void *lhsearch(lhash_t *lhtp, bool (*searchfn)(void* elementp, const void* searc
 	pthread_mutex_unlock(&m);
 }
 
-void *lhremove(lhash_t*
+void *lhremove(lhash_t* lhtp,
+							 bool (*searchfn)(void* elementp, const void* searchkeyp),
+							 const char *key,
+							 int32_t keylen) {
+	pthread_mutex_lock(&m);
+	hremove(lhtp->h,searchfn,key,keylen);
+	pthread_mutex_unlock(&m);
+}
+
+void lhclose(lhash_t* lhtp) {
+	pthread_mutex_lock(&m);
+	hclose(lhtp->h);
+	pthread_mutex_unlock(&m);
+	pthread_mutex_destroy(&m);
+}
