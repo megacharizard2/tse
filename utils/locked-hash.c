@@ -8,20 +8,21 @@
  * Description: 
  * 
  */
+#include <pthread.h>
 #include <stdint.h>
 #include "string.h"
 #include <stdlib.h>
 #include <hash.h>
 #include <queue.h>
 
-phtread_mutex_t m;
+pthread_mutex_t m;
 
 typedef struct lhash{
 	hashtable_t *h;
 
 } lhash_t;
 
-lhash_t *lhopen(uint32_t hsize){
+lhash_t *lhopen(uint32_t lhsize){
 	pthread_mutex_init(&m,NULL);
 	lhash_t* lockedH= malloc(sizeof(lhash_t*));
 	if (lockedH == NULL) {
@@ -29,7 +30,7 @@ lhash_t *lhopen(uint32_t hsize){
 	}
 	else{
 		hashtable_t* hold = malloc(sizeof(hashtable_t*));
-		hold = hopen();
+		hold = hopen(lhsize);
 		lockedH->h=hold;
 		return lockedH;
 	}
@@ -37,8 +38,9 @@ lhash_t *lhopen(uint32_t hsize){
 
 int32_t lhput(lhash_t *lhtp, void *ep, const char *key, int keylen){
 	pthread_mutex_lock(&m);
-	hput(lhtp->h,ep,key,keylen);
+	uint32_t returned=hput(lhtp->h,ep,key,keylen);
 	pthread_mutex_unlock(&m);
+	return returned;
 }
 
 void lhapply(lhash_t *lhtp, void (*fn)(void* ep)){
@@ -47,13 +49,13 @@ void lhapply(lhash_t *lhtp, void (*fn)(void* ep)){
 	pthread_mutex_unlock(&m);
 }
 
-void *lhsearch(lhash_t *lhtp, bool (*searchfn)(void* elementp, const void* searchkeyp), const char *key, int32_t keylen){
+void lhsearch(lhash_t *lhtp, bool (*searchfn)(void* elementp, const void* searchkeyp), const char *key, int32_t keylen){
 	pthread_mutex_lock(&m);
-	void* search = hsearch(lhtp->h,searchfn,key,keylen);
+	hsearch(lhtp->h,searchfn,key,keylen);
 	pthread_mutex_unlock(&m);
 }
 
-void *lhremove(lhash_t* lhtp,
+void lhremove(lhash_t* lhtp,
 							 bool (*searchfn)(void* elementp, const void* searchkeyp),
 							 const char *key,
 							 int32_t keylen) {

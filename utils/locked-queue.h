@@ -17,10 +17,10 @@ lqueue_t* lqopen(void);
 
 void lqput(lqueue_t *lqp, void *elementp);
 
-void* lqpet(lqueue_t *lqp);
+void* lqget(lqueue_t *lqp);
 
 void lqapply(lqueue_t *lqp, void (*fn)(void* elementp));
 
-void* lqsearch(lqueue_t *lqp, bool (*searchfn)(void* elementp, constant void* keyp), const void* skeyp);
+void* lqsearch(lqueue_t *lqp, bool (*searchfn)(void* elementp, const void* keyp), const void* skeyp);
 
 void lqclose(lqueue_t *lqp);
