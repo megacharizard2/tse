@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "testing putting/getting items"
+runtest.sh ./lqtest1
+echo "testing opening/closing"
+runtest.sh ./lqtest2
