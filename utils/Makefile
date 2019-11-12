@@ -30,8 +30,5 @@ lqtest2: lqtest2.o locked-queue.o
 	gcc $(CFLAGS) lqtest2.o locked-queue.o queue.o -o lqtest2 
 
 clean:
-<<<<<<< HEAD
-	rm -rf locked-queue.o webpage.o tools.o queue.o hash.o indexio.o *~
-=======
 	rm -rf webpage.o tools.o queue.o hash.o indexio.o locked-queue.o lqtest1.o  *~
->>>>>>> locked
+
