@@ -169,16 +169,16 @@ int main(int argc,char* argv[]){
     printf("usage: crawler <seedurl><pagedir> <maxdepth>\n");
     return 1;
   }
-	int sockets=atoi(argv[4]);
-	if (sockets == 0) {
+	int threads=atoi(argv[4]);
+	if (threads == 0) {
 		printf("Final argument must be an integer greater than 0");
 		return 2;
 	}
   int depth=atoi(argv[3]);
 	int i;
 	pthread_t threadid;
-	for (i=0; i<sockets; i++) {
-		pthread_create(&threadid, NULL, crawler, crawler (seedURL) (depth) (pageDirectory)); 
+	for (i=0; i<threads; i++) {
+		pthread_create(&threadid, NULL, crawler, NULL); 
 	}
   /*crawler(seedURL,depth,pageDirectory);*/
 }

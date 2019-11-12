@@ -8,6 +8,12 @@
 #include "webpage.h"
 #include <pthread.h>
 
+typedef struct params {
+	int depth;
+	char* seedURL;
+	char* dirname;
+} params_t;
+
 void *
 assertp(void *p, const char *message)
 {
@@ -90,7 +96,7 @@ void deletestring(void* elementp){
   free(elemen);
 }
 
-void crawler(char* seedURL,int maxdepth,char* dirname) {
+void crawler(char* seedURL,int maxdepth,char* dirname){
   char* urlcopy = assertp(malloc(strlen(seedURL)+1), "url copy\n");
   strcpy(urlcopy,seedURL);
   webpage_t *web = webpage_new(urlcopy, 0, NULL); 
@@ -150,6 +156,10 @@ void crawler(char* seedURL,int maxdepth,char* dirname) {
   lqclose(tocrawl);
 }
 
+void* crawlerhelper(void* param) {
+	
+}
+
 int main(int argc,char* argv[]){
   if (argc != 5){
     printf("There must be 5 arguments");
@@ -169,16 +179,16 @@ int main(int argc,char* argv[]){
     printf("usage: crawler <seedurl><pagedir> <maxdepth>\n");
     return 1;
   }
-	int sockets=atoi(argv[4]);
-	if (sockets == 0) {
+	int threads=atoi(argv[4]);
+	if (threads == 0) {
 		printf("Final argument must be an integer greater than 0");
 		return 2;
 	}
   int depth=atoi(argv[3]);
 	int i;
 	pthread_t threadid;
-	for (i=0; i<sockets; i++) {
-		pthread_create(&threadid, NULL, crawler, crawler (seedURL) (depth) (pageDirectory)); 
+	for (i=0; i<threads; i++) {
+		pthread_create(&threadid[i], NULL, crawler, ); 
 	}
   /*crawler(seedURL,depth,pageDirectory);*/
 }
