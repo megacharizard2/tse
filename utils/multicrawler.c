@@ -157,7 +157,8 @@ void crawler(char* seedURL,int maxdepth,char* dirname){
 }
 
 void* crawlerhelper(void* param) {
-	
+	params_t parameters = (params_t)param;
+	crawler(parameters.depth,parameters.seedURL,parameters.dirname);
 }
 
 int main(int argc,char* argv[]){
@@ -189,9 +190,10 @@ int main(int argc,char* argv[]){
 	array = malloc(threads * (sizeof(int));
   int depth=atoi(argv[3]);
 	int i;
-	
+	params_t param={depth,seedURL,pageDirectory};
 	for (i=0; i<threads; i++) {
-		pthread_create(&array[i], NULL, crawler, ); 
+		array[i] = i + 1;
+		pthread_create(&array[i], NULL, crawlerHelper,param); 
 	}
   /*crawler(seedURL,depth,pageDirectory);*/
 }
