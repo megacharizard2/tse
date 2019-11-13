@@ -14,9 +14,11 @@
 #include <stdlib.h>
 
 int main() {
-	printf("making a LH, testing put and get\n");
-	lhash_t* locked = lhopen();
-	printf("putting an element in lockedH\n");
-	int x = 2;
-	int* ptr = &x;
-	lhput(locked
+	printf("making a LH, testing open and close\n");
+	lhash_t* locked = lhopen(10);
+	if (locked == NULL){
+		exit(EXIT_FAILURE);
+	}
+	lhclose(locked);
+	exit(EXIT_SUCCESS);
+}

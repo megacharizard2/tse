@@ -184,11 +184,14 @@ int main(int argc,char* argv[]){
 		printf("Final argument must be an integer greater than 0");
 		return 2;
 	}
+	int threadid = 0;
+	int* array;
+	array = malloc(threads * (sizeof(int));
   int depth=atoi(argv[3]);
 	int i;
-	pthread_t threadid;
+	
 	for (i=0; i<threads; i++) {
-		pthread_create(&threadid[i], NULL, crawler, ); 
+		pthread_create(&array[i], NULL, crawler, ); 
 	}
   /*crawler(seedURL,depth,pageDirectory);*/
 }

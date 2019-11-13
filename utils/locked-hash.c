@@ -8,6 +8,7 @@
  * Description: 
  * 
  */
+#include "locked-hash.h"
 #include <pthread.h>
 #include <stdint.h>
 #include "string.h"
@@ -24,7 +25,7 @@ typedef struct lhash{
 
 lhash_t *lhopen(uint32_t lhsize){
 	pthread_mutex_init(&m,NULL);
-	lhash_s* lockedH= malloc(sizeof(lhash_s*));
+	lhash_s* lockedH= (lhash_s*)malloc(sizeof(lhash_s*));
 	if (lockedH == NULL) {
 		return NULL;
 	}
@@ -51,21 +52,23 @@ void lhapply(lhash_t *lhtp, void (*fn)(void* ep)){
 	pthread_mutex_unlock(&m);
 }
 
-void lhsearch(lhash_t *lhtp, bool (*searchfn)(void* elementp, const void* searchkeyp), const char *key, int32_t keylen){
+void *lhsearch(lhash_t *lhtp, bool (*searchfn)(void* elementp, const void* searchkeyp), const char *key, int32_t keylen){
 	pthread_mutex_lock(&m);
 	lhash_s* lockedH = (lhash_s*) lhtp;
-	hsearch(lockedH->h,searchfn,key,keylen);
+	void* searched = hsearch(lockedH->h,searchfn,key,keylen);
 	pthread_mutex_unlock(&m);
+	return searched;
 }
 
-void lhremove(lhash_t* lhtp,
+void *lhremove(lhash_t* lhtp,
 							 bool (*searchfn)(void* elementp, const void* searchkeyp),
 							 const char *key,
 							 int32_t keylen) {
 	pthread_mutex_lock(&m);
 	lhash_s* lockedH = (lhash_s*)lhtp;
-	hremove(lockedH->h,searchfn,key,keylen);
+	void* removed = hremove(lockedH->h,searchfn,key,keylen);
 	pthread_mutex_unlock(&m);
+	return removed;
 }
 
 void lhclose(lhash_t* lhtp) {

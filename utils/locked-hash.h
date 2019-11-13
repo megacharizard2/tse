@@ -8,6 +8,8 @@
  * Description: 
  * 
  */
+#pragma once
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -19,9 +21,9 @@ int32_t lhput(lhash_t *lhtp, void *ep, const char *key, int keylen);
 
 void lhapply(lhash_t *lhtp, void (*fn)(void* ep));
 
-void *lhsearch(lhash_t *lhtp, bool (*searchfn)(void* elementp, const void* searchkeyp), const char *key, int32_t keylen);
+void* lhsearch(lhash_t *lhtp, bool (*searchfn)(void* elementp, const void* searchkeyp), const char *key, int32_t keylen);
 
-void *lhremove(lhash_t* lhtp,
+void* lhremove(lhash_t* lhtp,
 							 bool (*searchfn)(void* elementp, const void* searchkeyp),
 							 const char *key,
 							 int32_t keylen);
