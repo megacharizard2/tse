@@ -106,6 +106,7 @@ void crawler(char* seedURL,int maxdepth,char* dirname){
   lqput(tocrawl,web);
   lhput(seenURLs,urlcopy,urlcopy,strlen(urlcopy));
   webpage_t* page;
+	page=lqget(tocrawl);
 	int pagename=0;
   while ((page=lqget(tocrawl)) != NULL){
     bool fetchsuccess=webpage_fetch(page);
@@ -152,13 +153,21 @@ void crawler(char* seedURL,int maxdepth,char* dirname){
     webpage_delete(page);
   }
   lhapply(seenURLs,printfn);
-  lhclose(seenURLs);
-  lqclose(tocrawl);
+	lhapply(seenURLs,deletestring);
+	lhclose(seenURLs);
+	lqclose(tocrawl);
 }
 
 void* crawlerhelper(void* param) {
 	params_t parameters = (params_t)param;
 	crawler(parameters.depth,parameters.seedURL,parameters.dirname);
+}
+
+int isempty(lqueue_t* queue) {
+	if(lqget(queue) == NULL){
+		return 1;
+	}
+	else return 0;
 }
 
 int main(int argc,char* argv[]){
@@ -185,15 +194,17 @@ int main(int argc,char* argv[]){
 		printf("Final argument must be an integer greater than 0");
 		return 2;
 	}
-	int threadid = 0;
-	int* array;
-	array = malloc(threads * (sizeof(int));
+  pthread_t thread[threads];
   int depth=atoi(argv[3]);
 	int i;
 	params_t param={depth,seedURL,pageDirectory};
 	for (i=0; i<threads; i++) {
-		array[i] = i + 1;
-		pthread_create(&array[i], NULL, crawlerHelper,param); 
+		pthread_create(&thread[i], NULL, crawlerHelper,(void *)param);
 	}
+	int j;
+	for (j=0; j<threads; j++) {
+		int k = pthread_join(&thread[j],
+	}
+			
   /*crawler(seedURL,depth,pageDirectory);*/
 }
