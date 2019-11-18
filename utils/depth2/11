@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Labs/Lab4/
+https://thayer.github.io/engs50/Notes/bash3/
 2
-19841
+78188
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Labs/Lab4/
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Lab 4 - Crawler</title>
+  <title>Introduction to Bash Programming</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Labs/Lab4/">
+  <link rel="canonical" href="/engs50/Notes/bash3/">
 </head>
 
 
@@ -44,268 +44,1063 @@ https://thayer.github.io/engs50/Labs/Lab4/
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Lab 4 - Crawler</h1>
+    <h1 class="post-title">Introduction to Bash Programming</h1>
   </header>
 
   <div class="post-content">
-    <p><strong>Due Friday, April 27, 2018, at 10pm</strong></p>
+    <p>Take time for this week’s <a href="/engs50/Reading/#week-1">reading</a>; it’s short, important, and useful.</p>
 
-<p>In this lab you’ll begin the Tiny Search Engine (TSE) by coding the Crawler according to the <a href="REQUIREMENTS.html">Crawler Requirements Spec</a> and the  <a href="DESIGN.html">Crawler Design Spec</a>.</p>
+<p>We are now familiar with the shell and a few commands.</p>
 
-<ul id="markdown-toc">
-  <li><a href="#preparation" id="markdown-toc-preparation">Preparation</a></li>
-  <li><a href="#assignment" id="markdown-toc-assignment">Assignment</a></li>
-  <li><a href="#whatsubmit" id="markdown-toc-whatsubmit">Submission - what</a></li>
-  <li><a href="#howsubmit" id="markdown-toc-howsubmit">Submission - how</a>    <ul>
-      <li><a href="#extensions" id="markdown-toc-extensions">Extensions</a></li>
-    </ul>
-  </li>
-  <li><a href="#hints-and-tips" id="markdown-toc-hints-and-tips">Hints and tips</a>    <ul>
-      <li><a href="#libcs50" id="markdown-toc-libcs50">libcs50</a></li>
-      <li><a href="#markdown" id="markdown-toc-markdown">Markdown</a></li>
-      <li><a href="#testing-crawler" id="markdown-toc-testing-crawler">Testing Crawler</a></li>
-      <li><a href="#use-valgrind-and-gdb" id="markdown-toc-use-valgrind-and-gdb">Use valgrind and gdb</a></li>
-      <li><a href="#memory-allocation" id="markdown-toc-memory-allocation">Memory allocation</a></li>
-      <li><a href="#hashtable-of-url" id="markdown-toc-hashtable-of-url">Hashtable of URL</a></li>
-      <li><a href="#pseudocode" id="markdown-toc-pseudocode">Pseudocode</a></li>
-      <li><a href="#pagedirectory" id="markdown-toc-pagedirectory">pageDirectory</a></li>
-    </ul>
-  </li>
-</ul>
+<p>In this lecture, we discuss shell programming using bash.
+The main goal is to write your own scripts.
+But what are <em>scripts?</em>
+And what are they useful for?</p>
 
-<h2 id="preparation">Preparation</h2>
+<h3 id="goals">Goals</h3>
 
-<ol>
-  <li>
-    <p><em>Fork</em> a copy of our <a href="https://gitlab.cs.dartmouth.edu/CS50/tse">TSE starter kit</a> to make a new project in your Gitlab account; see instructions in the README there.
-Ensure the repo is <em>Private</em>.
-Give “Master” access to Professor Palmer (ccpalmer) and to head grader Haider Syed ( he may have two ids in Gitlab, use the one with “@h”).</p>
-  </li>
-  <li>
-    <p><em>Clone</em> the new project to a Git repository on your CS Unix account; again, see instructions in your fork’s README.</p>
-  </li>
-  <li>
-    <p>Edit the <code class="highlighter-rouge">README.md</code> file to remove the git instructions; a suggested template is at the bottom of the file. Include your name!</p>
-  </li>
-  <li>
-    <p>In the terminal, <strong>copy</strong> your <a href="Lab3/">Lab 3</a> sources (just <code class="highlighter-rouge">counters.[ch] set.[ch] hashtable.[ch]</code>) to the <code class="highlighter-rouge">libcs50</code> subdirectory in your brand-new repository; try <code class="highlighter-rouge">make</code> in that directory to ensure everything works.</p>
-  </li>
-  <li>
-    <p><code class="highlighter-rouge">git add libcs50/*.[ch]; git commit -a; git push</code>.</p>
-  </li>
-  <li>
-    <p>Visit your repo on <a href="gitlab.cs.dartmouth.edu">Gitlab</a> and you should see the updated README and your new source files.
-Double-check the <a href="https://gitlab.cs.dartmouth.edu/help/public_access/public_access">visibility</a> of your repo to ensure it is <strong><em>Private</em></strong>.</p>
-  </li>
-</ol>
-
-<h2 id="assignment">Assignment</h2>
-
-<p>Write the <em>crawler</em>, first sub-system of the Tiny Search Engine.
-Please follow the <a href="/engs50/Resources/CodingStyle.html">CS50 coding style guidelines</a>, the <a href="REQUIREMENTS.html">Crawler Requirements Spec</a>, and the  <a href="DESIGN.html">Crawler Design Spec</a>.</p>
-
-<ol>
-  <li>
-    <p>Create a subdirectory <code class="highlighter-rouge">crawler</code>.</p>
-  </li>
-  <li>
-    <p>In that directory, write a program <code class="highlighter-rouge">crawler</code> that implements the Requirements Spec, leveraging your data structures.
-Please take special care that your crawler does not explore URLs that are not ‘internal’ according to <code class="highlighter-rouge">IsInternalURL()</code>.</p>
-  </li>
-  <li>
-    <p>In that directory, write a <code class="highlighter-rouge">Makefile</code> so you can build everything from the top-level directory by simply typing <code class="highlighter-rouge">make</code>, and clean up everything by typing <code class="highlighter-rouge">make clean</code>.
-To build <code class="highlighter-rouge">crawler</code> you will need to add <code class="highlighter-rouge">-lcurl</code> to include the <code class="highlighter-rouge">libcurl</code> library.</p>
-  </li>
-  <li>
-    <p>In that directory, write a <code class="highlighter-rouge">README.md</code> file to provide any special information about how to compile or use your crawler.
-This file is likely to be short.
-<em>You must use Markdown; see below.</em></p>
-  </li>
-  <li>
-    <p>In that directory, write a <code class="highlighter-rouge">IMPLEMENTATION.md</code> file to describe the implementation of your crawler.
-<em>You must use Markdown; see below.</em></p>
-  </li>
-  <li>
-    <p>Add a <code class="highlighter-rouge">TESTING.md</code> file in the <code class="highlighter-rouge">crawler</code> directory, telling the grader how you tested your crawler.
-(You may find it helpful to write a <code class="highlighter-rouge">bash</code> script to execute your crawler, and/or a <code class="highlighter-rouge">make test</code> target.) Read <a href="#testing-crawler">about testing</a> below.</p>
-  </li>
-  <li>
-    <p>As you create files and directories, add them to your git repository.
-<strong>Important:</strong> do not add any compiled files to git.
-In short: your repo should not contain any data files, core dumps, or files built with <code class="highlighter-rouge">make</code> and removed by <code class="highlighter-rouge">make clean</code>.
-Commit and push at least once a day.</p>
-  </li>
-</ol>
-
-<h2 id="whatsubmit">Submission - what</h2>
-
-<p>In this lab you shall add/edit these files in your repo:</p>
+<p>We learn the following today:</p>
 
 <ul>
-  <li><code class="highlighter-rouge">README.md</code> (edited)</li>
-  <li><code class="highlighter-rouge">Makefile</code> (possibly edited)</li>
-  <li><code class="highlighter-rouge">crawler/</code>
-    <ul>
-      <li><code class="highlighter-rouge">Makefile</code></li>
-      <li><code class="highlighter-rouge">crawler.c</code></li>
-      <li><code class="highlighter-rouge">README.md</code></li>
-      <li><code class="highlighter-rouge">IMPLEMENTATION.md</code></li>
-      <li><code class="highlighter-rouge">TESTING.md</code></li>
-      <li><em>optional other files related to testing</em></li>
-    </ul>
-  </li>
-  <li><code class="highlighter-rouge">common/</code> <em>if you follow our tip/suggestion below</em>
-    <ul>
-      <li><code class="highlighter-rouge">pagedir.c</code></li>
-      <li><code class="highlighter-rouge">pagedir.h</code></li>
-    </ul>
-  </li>
-  <li><code class="highlighter-rouge">libcs50/</code>  <em>if you wish to use your Lab3 solution</em>
-    <ul>
-      <li><code class="highlighter-rouge">set.c</code></li>
-      <li><code class="highlighter-rouge">counters.c</code></li>
-      <li><code class="highlighter-rouge">hashtable.c</code></li>
-    </ul>
-  </li>
+  <li>Understanding shell script syntax and constructs</li>
+  <li>Writing simple interactive scripts</li>
+  <li>Writing and executing your first shell script</li>
+  <li>Understanding more advanced constructs through examples</li>
 </ul>
 
-<p><em>You shall NOT modify any of the code we provide in <code class="highlighter-rouge">libcs50</code></em>.</p>
+<h3 id="class-scripts">Class scripts</h3>
 
-<p><em>You shall NOT include any data files produced by the crawler, any binary/object files produced by the compiler, backup files, core dumps etc.</em></p>
+<p>I recorded my Terminal windows today on <a href="/engs50/Notes/bash3/script-mac.txt">Mac</a> and <a href="/engs50/Notes/bash3/script-flume.txt">flume</a>.</p>
 
-<h2 id="howsubmit">Submission - how</h2>
+<h2 id="interactive-mode-and-shell-scripts">Interactive mode and shell scripts</h2>
 
-<p>When you are ready for final submission,</p>
+<p>The shell can be used in two different ways:</p>
 
 <ul>
-  <li><strong>Add</strong> all required files using an appropriate <code class="highlighter-rouge">git add</code> commandline.</li>
-  <li><strong>Commit</strong> all changes using an appropriate <code class="highlighter-rouge">git commit</code> commandline.</li>
-  <li><strong>Tag</strong>: <code class="highlighter-rouge">git tag lab4submit</code></li>
-  <li><strong>Push</strong>: <code class="highlighter-rouge">git push --tags</code> to ensure the tags are pushed to the remote.
-See <a href="/git/tags.html">more about tags</a>.</li>
+  <li><em>interactive mode</em>, which allows you to enter more than one command interactively to the shell.
+We have been doing this already.
+However, interactive mode allows you to enter a series of commands; and</li>
+  <li><em>shell scripts</em>, in which the shell reads commands a series of commands (or complex programs) from a text file.</li>
 </ul>
 
-<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="highlighter-rouge">lab4submit</code> and the files associated with that tagged commit include everything we’ll need to grade your lab.</p>
+<p>The interactive mode is fine for entering a handful of commands but it becomes cumbersome for the user to keep re-entering these commands interactively.
+It is better to store the commands in a text file called a shell script, or <em>script</em> for short, and execute the script when needed.
+In this way, the script is preserved so you and other users can use it again.</p>
 
-<p>We grade the version tagged <code class="highlighter-rouge">lab4submit</code> so it is safe for you to continue work (e.g., so you can start work on Lab 5), even if you commit or push.</p>
+<p>In addition to calling Unix commands (e.g., <code class="highlighter-rouge">grep</code>, <code class="highlighter-rouge">cd</code>, <code class="highlighter-rouge">rm</code>) shell scripts can also invoke compiled programs (e.g., C programs) and other shell scripts.
+Shell programming also includes control-flow commands to test conditions (<code class="highlighter-rouge">if...then</code>) or to do a task repeatedly (<code class="highlighter-rouge">for...do</code>).
+These control structure commands found in many other languages (such as C, or other scripting languages like python) allow the programmer to quickly write fairly sophisticated shell programs to do a number of different tasks.</p>
 
-<p>We will clone your repo at 0h, 24h, 48h, and 72h after the original deadline.
-We will start grading when we first see one with tag <code class="highlighter-rouge">lab4submit</code>, and judge it late if that tag was added after the deadline.
-To avoid confusion, <em>please blitz <code class="highlighter-rouge">cs50 AT cs.dartmouth.edu</code> if you want a late submission to be graded instead of your on-time submission.</em></p>
+<p>Like python, and unlike C or Java, shell scripts are not <em>compiled</em>; rather, they are <em>interpreted</em> and executed by the shell itself.</p>
 
-<p><strong><em>Your entire codebase must compile with <code class="highlighter-rouge">make</code> from the top-level directory and produce no compiler warnings.</em></strong>  If we find that your code will not compile, or has <strong>segmentation faults</strong>, we will send it back to you as soon as we can for repair; recall the <a href="/#crashes">grading policy</a>.</p>
+<p>Shell scripts are used for many reasons - building and configuring systems or environments, prototyping code, or an array of repetitive tasks that programmers do.
+Shell programming is mainly built on the Unix shell commands and utilities; reuse of these existing programs enables programmers to simply build new programs to tackle fairly complex jobs.</p>
 
-<p>We will run your crawler on our own set of test data.</p>
+<h2 id="separating-groups-of-commands-using-">Separating groups of commands using ‘;’</h2>
 
-<p>We will run <code class="highlighter-rouge">valgrind</code> on your program to look for memory leaks; you will lose points for memory leaks or memory errors.
-<strong>Important</strong>: the <code class="highlighter-rouge">libcurl</code> library is known to leave some “still reachable” memory; these are not your fault and will not count against you.</p>
+<p>Let’s start to build up our knowledge of how scripts work by first looking at some basic operations of the shell.
+The Unix shell allows for the unconditional execution of commands and allows for related commands to be kept adjacent as a command sequence using the semicolon character as shown below:</p>
 
-<h3 id="extensions">Extensions</h3>
-
-<p>If you want to claim your 24h extension, create a file <code class="highlighter-rouge">EXTENSION</code> at the top-level directory of your repository.
-Don’t forget to <code class="highlighter-rouge">git push</code> <em>(before the deadline!)</em> so we will see the file.
-For example,</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>touch EXTENSION
-<span class="nv">$ </span>git add EXTENSION
-<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"extension request"</span>
-<span class="nv">$ </span>git tag lab4submit     <span class="c"># add tag, as above</span>
-<span class="nv">$ </span>git push <span class="nt">--tags</span>        <span class="c"># push to gitlab, including tags</span>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">echo </span>Directory listing<span class="p">;</span> date<span class="p">;</span> <span class="nb">ls
+</span>Directory listing
+Fri Apr  1 08:58:08 EDT 2016
+Archive/  primes  private/  public_html/  resources/  students	web@  ziplab1.sh<span class="k">*</span>
+<span class="o">[</span>cs50@flume ~]<span class="err">$</span>
 </code></pre></div></div>
 
-<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="highlighter-rouge">lab4submit</code> and that its files include <code class="highlighter-rouge">EXTENSION</code>.</p>
+<h2 id="exit-status---who-cares">Exit status - who cares?</h2>
 
-<p>When you are ready to submit your code, remove <code class="highlighter-rouge">EXTENSION</code> as follows, <em>update your submission tag</em>, and push to Gitlab:</p>
+<p>When using the shell interactively it is often clear when we have made a mistake - the shell warns about incorrect syntax, and complains about invalid switches or missing files.
+These warnings and complaints can come from the shell’s parser and from the program being run (for example, from <code class="highlighter-rouge">ls</code>).</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git rm EXTENSION
-<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"ready for grading"</span>
-<span class="nv">$ </span>git push <span class="nt">--delete</span> origin lab4submit <span class="c"># remove the tag from remote</span>
-<span class="nv">$ </span>git tag <span class="nt">-f</span> lab4submit  <span class="c"># move the local tag forward to this commit</span>
-<span class="nv">$ </span>git push <span class="nt">--tags</span>        <span class="c"># push to gitlab remote, including tags</span>
+<p>Error messages provide visual clues that something is wrong, allowing us to adjust the command to get it right.</p>
+
+<p>Commands also inform the shell explicitly whether the command has terminated successfully or unsuccessfully due to some error.
+Commands do this by returning an <em>exit status</em>, which is represented as an integer value made available to the shell and other commands, programs, and scripts.</p>
+
+<p>The shell understands an exit status of <code class="highlighter-rouge">0</code> to indicate successful execution, and any other value (always positive) to indicate failure of some sort.</p>
+
+<p>The shell environment value <code class="highlighter-rouge">$?</code> is updated each time a command exits.</p>
+
+<p>What do we mean by that?</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">echo </span>April Fool
+April Fool
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$?</span>
+0
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">ls </span>April Fool
+<span class="nb">ls</span>: cannot access April: No such file or directory
+<span class="nb">ls</span>: cannot access Fool: No such file or directory
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$?</span>
+2
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
 </code></pre></div></div>
 
-<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="highlighter-rouge">lab4submit</code>, that its files do <em>not</em> include <code class="highlighter-rouge">EXTENSION</code>, and its files include everything we’ll need to grade your lab.</p>
+<h2 id="conditional-sequences---basic-constructs">Conditional sequences - basic constructs</h2>
 
-<h1 id="hints-and-tips">Hints and tips</h1>
+<p>Why do we need to use the exit status?</p>
 
-<h3 id="libcs50">libcs50</h3>
+<p>Often we want to execute a command based on the success or failure of an earlier command.
+For example, we may only wish to remove files if we are in the correct directory, or perhaps we want to be careful to only append info to a file if we know it already exists.</p>
 
-<p>We provide several modules in the <code class="highlighter-rouge">libcs50</code> directory, which compiles to a library <code class="highlighter-rouge">libcs50.a</code> you can link with your crawler.
-<em>You should not change any of our code.</em>
-You may drop in your <code class="highlighter-rouge">set.[ch]</code>, <code class="highlighter-rouge">counters.[ch]</code>, <code class="highlighter-rouge">hashtable.[ch]</code> files from Lab 3.
-If you’d prefer to use our version of <em>set</em>, <em>counters</em>, and <em>hashtable</em>, that’s totally fine; the starter kit includes a pre-compiled library you can use instead; see <code class="highlighter-rouge">libcs50/README.md</code>.</p>
+<p>The shell provides both conjunction (and) and disjunction (or) based on previous commands.
+These are useful constructs for writing decision-making scripts.
+Take a look at the example below in which we make three directories, then try to remove the first:</p>
 
-<p>Most of the modules in this directory are documented with a corresponding Markdown file.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>mkdir labs <span class="o">&amp;&amp;</span> mkdir labs/lab1 labs/labs2
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>rmdir labs <span class="o">||</span> <span class="nb">echo </span>whoops!
+rmdir: failed to remove <span class="sb">`</span>labs<span class="s1">': Directory not empty
+whoops!
+[cs50@flume ~]$     
+</span></code></pre></div></div>
 
-<h3 id="markdown">Markdown</h3>
+<p>In the first example, <code class="highlighter-rouge">&amp;&amp;</code> (without any spaces) specifies that the second command should be only executed if the first command succeeds (with an exit status of <code class="highlighter-rouge">0</code>) - i.e., we only make the subdirectories if we can make the top directory.</p>
 
-<p>In this and subsequent labs, you must provide documentation files in Markdown format, that is, you should supply <code class="highlighter-rouge">README.md</code>, <code class="highlighter-rouge">IMPLEMENTATION.md</code>, and <code class="highlighter-rouge">TESTING.md</code>.
-The Markdown syntax provides very simple (and readable) markup for headings, lists, italics, bold, and code snippets.
-(This course website is written in Markdown.) See <a href="/engs50/Resources/#markdown">Markdown resources</a>.</p>
+<p>In the second example, (<code class="highlighter-rouge">||</code>) (without any spaces) requests that the second command is only executed if the first command failed (with an exit status other than <code class="highlighter-rouge">0</code>).</p>
 
-<h3 id="testing-crawler">Testing Crawler</h3>
+<h2 id="conditional-execution-using-if-then-else">Conditional execution using if, then, else</h2>
 
-<p>It is your responsibility to test your crawler and write about your approach in <code class="highlighter-rouge">TESTING.md</code>.
-Consider following some of the testing plan discussed in <a href="/crawler/">Lecture</a>.</p>
+<p>There are many situations when we need to execute commands based on the outcome of an earlier command.</p>
 
-<p>Some safe seeds you might test include</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span>command0<span class="p">;</span> <span class="k">then
+	</span>command1
+	command2
+<span class="k">fi</span>
+</code></pre></div></div>
 
-<ul>
-  <li>http://old-www.cs.dartmouth.edu/~cs50/data/tse/letters</li>
-  <li>http://old-www.cs.dartmouth.edu/~cs50/index.html</li>
-  <li>http://old-www.cs.dartmouth.edu/~cs50/data/tse/wikipedia</li>
-</ul>
+<p>Here <code class="highlighter-rouge">command1</code> and <code class="highlighter-rouge">command2</code> (and any other commands that might be input) will be executed if and only if <code class="highlighter-rouge">command0</code> returns a successful or true value (i.e., its exit status is <code class="highlighter-rouge">0</code>).</p>
 
 <blockquote>
-  <p>The first two are good at depths 0 and higher, but the Wikipedia case is likely too slow to run past maxDepth=2.</p>
+  <p>The fact that <code class="highlighter-rouge">0</code> means true is confusing for many people!
+(In many high-level languages - like C - zero means false and non-zero means true; technology isn’t always consistent.)
+The reason Unix uses <code class="highlighter-rouge">0</code> for success is that there is only one <code class="highlighter-rouge">0</code>, but there are many non-zero numbers; thus, <code class="highlighter-rouge">0</code> implies ‘all is well’ whereas non-zero implies ‘something went wrong’, and the specific non-zero value can convey information about <em>what</em> went wrong.</p>
 </blockquote>
 
-<p>You may point your crawler at any other CS user’s home page - but your seed URL must begin with <code class="highlighter-rouge">http://old-www.cs.dartmouth.edu/</code>.</p>
+<p>Similarly, we may have commands to execute if the conditional fails.</p>
 
-<p>For example, you might construct your own test files in your CS Unix account in a directory like <code class="highlighter-rouge">~/public_html/tse</code> and crawl the URL <code class="highlighter-rouge">http://old-www.cs.dartmouth.edu/~YOURUSERID/tse</code></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span>command0<span class="p">;</span> <span class="k">then
+	</span>command1
+	command2
+<span class="k">else
+	</span>command3
+	command4
+<span class="k">fi</span>
+</code></pre></div></div>
 
-<h3 id="use-valgrind-and-gdb">Use valgrind and gdb</h3>
+<p>Here <code class="highlighter-rouge">command3</code> and <code class="highlighter-rouge">command4</code> will be executed if and only if <code class="highlighter-rouge">command0</code> fails.</p>
 
-<p>In <a href="/debug/">Lecture</a> we learned how to use <code class="highlighter-rouge">valgrind</code> and <code class="highlighter-rouge">gdb</code>; make use of them.</p>
+<h3 id="first-interactive-shell-program">First Interactive Shell Program</h3>
 
-<h3 id="memory-allocation">Memory allocation</h3>
+<p>Entering interactive scripts - that is, a tiny sequence of commands, typed at the keyboard in an interactive shell - is an easy way to get the sense of a new scripting language or to try out a set of commands.
+During an interactive session the shell simply allows you to enter an ‘one-command’ interactive program at the command line and then executes it.</p>
 
-<p>You may find the <code class="highlighter-rouge">memory.c</code> module useful.
-Its use is optional, but it is ready to use as part of library <code class="highlighter-rouge">libcs50.a</code>.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="k">if </span>cp students students.bak
+<span class="o">&gt;</span> <span class="k">then</span>
+<span class="o">&gt;</span> <span class="nb">echo</span> <span class="nv">$?</span> copy succeeded!
+<span class="o">&gt;</span> <span class="k">else</span>
+<span class="o">&gt;</span> <span class="nb">echo</span> <span class="nv">$?</span> copy failed!
+<span class="o">&gt;</span> <span class="k">fi
+</span>0 copy succeeded!
+<span class="o">[</span>cs50@flume ~]<span class="err">$</span>
+</code></pre></div></div>
 
-<p>In our Lab3 we tried to recover gracefully from memory-allocation failures.
-In the TSE application programs, we’ll be a bit more lazy: on NULL return from malloc/calloc you can print an error and exit with non-zero exit status.
-(You may find the <code class="highlighter-rouge">assertp()</code> function, defined by the  <code class="highlighter-rouge">memory</code> module, to be useful here.)</p>
+<p>The <code class="highlighter-rouge">&gt;</code> character is the <em>secondary prompt</em>, issued by the shell indicating that more input is expected.</p>
 
-<h3 id="hashtable-of-url">Hashtable of URL</h3>
+<p>The exit status of the <code class="highlighter-rouge">cp</code> command is used by the shell to decide whether to execute the <code class="highlighter-rouge">then</code> clause or the <code class="highlighter-rouge">else</code> clause.
+Just for yucks, I had <code class="highlighter-rouge">echo</code> show us the exit status <code class="highlighter-rouge">$?</code>; the above example confirms that <code class="highlighter-rouge">0</code> status means ‘true’ and triggered the <code class="highlighter-rouge">then</code> clause.</p>
 
-<p>Our design calls for use of a Hashtable to store the URLs already seen.
-Our Hashtable implementation stores a <code class="highlighter-rouge">void*item</code> with each key… but if you’re just storing URLs (as keys), what item do you store?
-Our hashtable disallows NULL items.
-Suggestion: just pass a constant string as the item.</p>
+<p>We can invert the conditional test by preceding it with <code class="highlighter-rouge">!</code>, as in many programming languages:</p>
 
-<h3 id="pseudocode">Pseudocode</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="k">if</span> <span class="o">!</span> cp students students.bak
+<span class="o">&gt;</span> <span class="k">then</span>
+<span class="o">&gt;</span> <span class="nb">echo </span>copy failed!
+<span class="o">&gt;</span> <span class="k">fi</span>
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
+</code></pre></div></div>
+<blockquote>
+  <p>Astute readers might note that I did not quote or escape the <code class="highlighter-rouge">!</code> in the echo commands.
+I’ve noticed that the <code class="highlighter-rouge">!</code> is not special if it comes last, which is handy for writing interjections!</p>
+</blockquote>
 
-<p>Your implementation does not need to follow our pseudocode; this is one reason why you need to write about your implementation choices in <code class="highlighter-rouge">IMPLEMENTATION.md</code>.</p>
+<p>The <code class="highlighter-rouge">command0</code> can actually be a sequence or pipeline.
+The exit status of the last command is used to determine the conditional outcome.</p>
 
-<p>Our pseudocode refers to a <code class="highlighter-rouge">pagefetcher</code>; note this is effectively <code class="highlighter-rouge">webage_fetch()</code>.
-<strong>Note that <code class="highlighter-rouge">webage_fetch()</code> inserts a 1-second delay after every fetch attempt</strong>; your Crawler thus gets this behavior for free.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="k">if </span>mkdir backup <span class="o">&amp;&amp;</span> cp students backup/students
+<span class="o">&gt;</span> <span class="k">then</span>
+<span class="o">&gt;</span> <span class="nb">echo </span>backup success
+<span class="o">&gt;</span> <span class="k">else</span>
+<span class="o">&gt;</span> <span class="nb">echo </span>backup failed
+<span class="o">&gt;</span> <span class="k">fi
+</span>backup success
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
+</code></pre></div></div>
 
-<p>Our pseudocode refers to a <code class="highlighter-rouge">pagescanner</code>; yours should leverage <code class="highlighter-rouge">webage_getNextURL()</code>.</p>
+<p>In the above example, <code class="highlighter-rouge">then</code> was on the next line instead of at the end of the <code class="highlighter-rouge">if</code> line.
+That’s a stylistic choice; if you want it on the <code class="highlighter-rouge">if</code> line you simply need to put a semicolon (<code class="highlighter-rouge">;</code>) after the <code class="highlighter-rouge">if</code> condition and before the word <code class="highlighter-rouge">then</code>, as seen in the earlier examples.</p>
 
-<h3 id="pagedirectory">pageDirectory</h3>
+<h3 id="the-test-aka---command">The test, aka [ ] command</h3>
 
-<p>The Crawler is supposed to determine whether the pathname provided as pageDirectory is indeed a directory, and is writable (meaning, you can create files there).
-How?
-The simplest method is to create a file there.
-If you construct a string <code class="highlighter-rouge">filename</code> that is the directory name, followed by a slash <code class="highlighter-rouge">'/'</code>, followed by a file name like <code class="highlighter-rouge">.crawler</code>, you could call <code class="highlighter-rouge">fopen(filename, "w")</code>; if it returns NULL (failure), then either the directory does not exist or is not writable.
-If it returns non-NULL (success), close the file.
-It’s fine to leave <code class="highlighter-rouge">.crawler</code> in the page directory.
-(Actually, the presence of this file will later help your indexer  confirm the pageDirectory is indeed a Crawler-produced directory.)</p>
+<p>The <code class="highlighter-rouge">command0</code> providing the exit status need not be an external command.
+We can test for several conditions using the built-in <code class="highlighter-rouge">test</code> or (interchangeably) the <code class="highlighter-rouge">[ ]</code> command.
+We use both below but we recommend you use the <code class="highlighter-rouge">[ ]</code> version of the test command because (a) it is more readable and (b) it’s more commonly used.
+Suppose I want to backup <code class="highlighter-rouge">students</code> only if it exists; the <code class="highlighter-rouge">-f</code> switch tests whether the following filename names an existing file.</p>
 
-<p><strong>Tip: think ahead</strong>, and put the code for writing webpages to the pageDirectory in a separate <code class="highlighter-rouge">pagedir</code> module, in the <code class="highlighter-rouge">common</code> directory.
-Write a <code class="highlighter-rouge">Makefile</code> that produces library <code class="highlighter-rouge">common/common.a</code>.
-Not required for Lab4 but you’ll end up needing to take this step in Lab5 anyway.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="k">if </span><span class="nb">test</span> <span class="nt">-f</span> students
+<span class="o">&gt;</span> <span class="k">then</span>
+<span class="o">&gt;</span> mkdir backup <span class="o">&amp;&amp;</span> cp students backup/students <span class="o">||</span> <span class="nb">echo </span>backup failed
+<span class="o">&gt;</span> <span class="k">fi</span>
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>Rewritten with <code class="highlighter-rouge">[ ]</code>,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="k">if</span> <span class="o">[</span> <span class="nt">-f</span> students <span class="o">]</span>
+<span class="o">&gt;</span> <span class="k">then</span>
+<span class="o">&gt;</span> mkdir backup <span class="o">&amp;&amp;</span> cp students backup/students <span class="o">||</span> <span class="nb">echo </span>backup failed
+<span class="o">&gt;</span> <span class="k">fi</span>
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>More commonly, the <code class="highlighter-rouge">if</code> and <code class="highlighter-rouge">then</code> are written on the same line, using semicolon:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="k">if</span> <span class="o">[</span> <span class="nt">-f</span> students <span class="o">]</span> <span class="p">;</span> <span class="k">then</span>
+<span class="o">&gt;</span> mkdir backup <span class="o">&amp;&amp;</span> cp students backup/students <span class="o">||</span> <span class="nb">echo </span>backup failed
+<span class="o">&gt;</span> <span class="k">fi</span>
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>Note, it’s important that you leave spaces around the brackets or you will get syntax errors.
+There are other options that can be used with the <code class="highlighter-rouge">[ ]</code> command.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   Option       Meaning
+     <span class="nt">-e</span>         does the file exist?
+     <span class="nt">-d</span>         does the directory exist?
+     <span class="nt">-f</span>         does the file exist and is it an ordinary file <span class="o">(</span>not a directory<span class="o">)</span>?
+     <span class="nt">-r</span>         does the file exist and is it readable?
+     <span class="nt">-s</span>         does the file exist and have a size greater than 0 bytes
+     <span class="nt">-w</span>         does the file exist and is it writeable?
+     <span class="nt">-x</span>         does the file exist and is it executable?
+</code></pre></div></div>
+
+<p>To learn even more about the <code class="highlighter-rouge">test</code> command,  <code class="highlighter-rouge">man test</code>.</p>
+
+<h2 id="loops-for-lists">Loops for lists</h2>
+
+<p>Many commands accept a list of files on the command line and perform actions on each file in turn.
+However, what if we need to perform a sequence of commands on each file in the list of files?
+Some commands can only handle one file (or argument) per invocation so we need to invoke the command many times.</p>
+
+<p>The shell supports a simple iteration over lists of values - typically over lists of filenames.
+In the following example, we make a ‘back up’ copy of each of our C files by appending the <code class="highlighter-rouge">.bak</code> extension.
+(Again, this extension is just a naming convention - Unix doesn’t care, nor does the shell.)</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~/example]<span class="nv">$ </span><span class="nb">ls
+</span>hash.c	hash.c.date  makefile  output.data  queue.c  README  sort.c
+<span class="o">[</span>cs50@flume ~/example]<span class="nv">$ </span><span class="k">for </span>i <span class="k">in</span> <span class="k">*</span>.c
+<span class="o">&gt;</span> <span class="k">do</span>
+<span class="o">&gt;</span> <span class="nb">echo </span>back up <span class="nv">$i</span>
+<span class="o">&gt;</span> cp <span class="nv">$i</span> <span class="nv">$i</span>.bak
+<span class="o">&gt;</span> <span class="k">done
+</span>back up hash.c
+back up queue.c
+back up sort.c
+<span class="o">[</span>cs50@flume ~/example]<span class="nv">$ </span><span class="nb">ls
+</span>hash.c	    hash.c.date  output.data  queue.c.bak  sort.c
+hash.c.bak  makefile	 queue.c      README	   sort.c.bak
+<span class="o">[</span>cs50@flume ~/example]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>Notice that the variable <code class="highlighter-rouge">i</code> is instantiated, one at a time, with the value of each argument in the list provided after <code class="highlighter-rouge">in</code>, and that value is substituted wherever <code class="highlighter-rouge">$i</code> occurs.</p>
+
+<p>We should be more defensive, though, in case one of the filenames has a space inside it;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~/example]<span class="nv">$ </span><span class="k">for </span>i <span class="k">in</span> <span class="k">*</span>.c
+<span class="o">&gt;</span> <span class="k">do</span>
+<span class="o">&gt;</span> <span class="nb">echo </span>back up <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span>
+<span class="o">&gt;</span> cp <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$i</span><span class="s2">.bak"</span>
+<span class="o">&gt;</span> <span class="k">done
+</span>back up hash.c
+back up queue.c
+back up sort.c
+<span class="o">[</span>cs50@flume ~/example]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>As expected we may place as many commands as we want inside the body of a loop.
+We can use any combination of other if/else tests and nested loops, just like in traditional languages such as C.</p>
+
+<p>We are not limited to use names of files (as generated by filename expansion) in our list:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="k">for </span>house <span class="k">in </span>Allen <span class="s2">"East Wheelock"</span> <span class="s2">"North Park"</span> School South West LLC
+<span class="o">&gt;</span> <span class="k">do</span>
+<span class="o">&gt;</span> <span class="nb">echo</span> <span class="nv">$house</span> is the best house!
+<span class="o">&gt;</span> <span class="k">done
+</span>Allen is the best house!
+East Wheelock is the best house!
+North Park is the best house!
+School is the best house!
+South is the best house!
+West is the best house!
+LLC is the best house!
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>We can use the <em>contents of a file</em> to provide the list used by <code class="highlighter-rouge">for</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">cat </span>LFlist
+John.P.Kotz.19@dartmouth.edu
+joel.j.katticaran.ug@dartmouth.edu
+Kaya.M.Thomas.17@dartmouth.edu
+trevor.l.davis.18@dartmouth.edu
+Thomas.D.Kim.19@dartmouth.edu
+kyle.dotterrer.18@dartmouth.edu
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="k">for </span>i <span class="k">in</span> <span class="k">$(</span>&lt;LFlist<span class="k">)</span> <span class="p">;</span> <span class="k">do </span><span class="nb">echo </span>hello <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span> <span class="p">;</span> <span class="k">done
+</span>hello John.P.Kotz.19@dartmouth.edu
+hello joel.j.katticaran.ug@dartmouth.edu
+hello Kaya.M.Thomas.17@dartmouth.edu
+hello trevor.l.davis.18@dartmouth.edu
+hello Thomas.D.Kim.19@dartmouth.edu
+hello kyle.dotterrer.18@dartmouth.edu
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>Notice the special shell syntax <code class="highlighter-rouge">$(&lt;filename)</code>, which means to substitute the contents of <code class="highlighter-rouge">filename</code>.
+Any spaces or newlines in the file will cause the shell to delineate <em>words</em> that become arguments to <code class="highlighter-rouge">for</code>.</p>
+
+<p>The example also demonstrates how one can use semicolons to write a simple loop all on one line!</p>
+
+<blockquote>
+  <p>In fact, if you type a multi-line <code class="highlighter-rouge">if</code> or <code class="highlighter-rouge">for</code> statement, then execute it, and later use up-arrow (or ctrl-P) to have the shell retrieve your earlier command, you’ll see that it formats it this way.</p>
+</blockquote>
+
+<p>We can even use the <em>output of a command</em> to provide the list used by <code class="highlighter-rouge">for</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="k">for </span>i <span class="k">in</span> <span class="k">$(</span>sed <span class="s1">'s/\..*/!/'</span> LFlist | sort<span class="k">)</span><span class="p">;</span> <span class="k">do </span><span class="nb">echo </span>hello <span class="nv">$i</span><span class="p">;</span> <span class="k">done
+</span>hello John!
+hello Kaya!
+hello Thomas!
+hello joel!
+hello kyle!
+hello trevor!
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>Indeed, in this case, we’ve used a pipeline of two commands to produce the list of arguments to <code class="highlighter-rouge">for</code>.</p>
+
+<blockquote>
+  <p>You may see old scripts (or old people!) using the old-fashioned syntax in which the command is surrounded by back-quotes, <code class="highlighter-rouge">`command`</code>, instead of <code class="highlighter-rouge">$(command)</code>; the latter is arguably more readable and, sometimes, nestable.</p>
+</blockquote>
+
+<h2 id="first-shell-script">First Shell Script</h2>
+
+<p>Up until now we have entered scripts interactively into the shell.
+It is a pain to have to keep re-entering scripts interactively.
+It is better to store the script commands in a text file and then execute the script when we need it.
+So how do we do that?</p>
+
+<p>Simple!  Write the commands in a file, and ask <code class="highlighter-rouge">bash</code> to read commands from the file instead of from the keyboard.</p>
+
+<p>For example, we can put our simple backup script into a file called <code class="highlighter-rouge">backup.sh</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~/example]<span class="nv">$ </span><span class="nb">cat</span> <span class="o">&gt;</span> backup.sh
+<span class="k">for </span>i <span class="k">in</span> <span class="k">*</span>.c
+<span class="k">do
+  </span><span class="nb">echo </span>back up <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span>
+  cp <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$i</span><span class="s2">.bak"</span>
+<span class="k">done</span>
+<span class="o">[</span>cs50@flume ~/example]<span class="nv">$ </span>bash backup.sh
+back up hash.c
+back up queue.c
+back up sort.c
+<span class="o">[</span>cs50@flume ~/example]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>Here I’ve typed it at the keyboard, but for more complex scripts, you would of course want to use a text editor.</p>
+
+<p>Indeed, we can go further, and make the file into a command executable at the shell prompt; to do so, you should</p>
+
+<ol>
+  <li>add a special string <code class="highlighter-rouge"><span class="c">#!/bin/bash</span></code> to the first line,</li>
+  <li>make it executable (with <code class="highlighter-rouge">chmod</code>), and</li>
+  <li>either
+    <ul>
+      <li>add it to a directory on our <code class="highlighter-rouge">PATH</code>, or</li>
+      <li>type its pathname at the commandline.</li>
+    </ul>
+  </li>
+</ol>
+
+<p>So, for <code class="highlighter-rouge">backup.sh</code>, it looks like this:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~/example]<span class="nv">$ </span>emacs backup.sh
+<span class="o">[</span>cs50@flume ~/example]<span class="nv">$ </span><span class="nb">cat </span>backup.sh
+<span class="c">#!/bin/bash</span>
+<span class="k">for </span>i <span class="k">in</span> <span class="k">*</span>.c
+<span class="k">do
+  </span><span class="nb">echo </span>back up <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span>
+  cp <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$i</span><span class="s2">.bak"</span>
+<span class="k">done</span>
+<span class="o">[</span>cs50@flume ~/example]<span class="nv">$ </span>chmod +x backup.sh
+<span class="o">[</span>cs50@flume ~/example]<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-l</span> backup.sh
+<span class="nt">-rwxr-xr-x</span> 1 cs50 cs50 72 Apr  3 15:28 backup.sh<span class="k">*</span>
+<span class="o">[</span>cs50@flume ~/example]<span class="nv">$ </span>./backup.sh
+back up hash.c
+back up queue.c
+back up sort.c
+<span class="o">[</span>cs50@flume ~/example]<span class="err">$</span>
+</code></pre></div></div>
+
+<p>There are a couple of things to note about this example.</p>
+
+<p>First, there is the <code class="highlighter-rouge"><span class="c">#!/bin/bash</span></code> line.
+What does this mean?
+Typically, the <code class="highlighter-rouge">#</code> in the first column of a file denotes the start of a comment until the end of the line.
+Indeed, in this case, this line is treated as a comment by <code class="highlighter-rouge">bash</code>.
+<em>Unix, however, reads that line when you execute the file and uses it to determine which command should be fed this file;</em> thus, in effect, Unix will execute <code class="highlighter-rouge">/bin/bash ./backup.sh</code>.
+Then <code class="highlighter-rouge">bash</code> reads the file and interprets its commands.
+The <code class="highlighter-rouge"><span class="c">#!/bin/bash</span></code> must be the first line of the file, exactly like that - no spaces.</p>
+
+<p>Second, there is <code class="highlighter-rouge">chmod +x</code>,  which sets the ‘execute’ permission on the file.
+(Notice the ‘x’ characters in the file permissions displayed by <code class="highlighter-rouge">ls</code>.)  Unix will not execute files that do not have ‘execute’ permission, and the shell won’t even try.</p>
+
+<p>Third, we used the pathname <code class="highlighter-rouge">./backup.sh</code> when treating our script as a command, because <code class="highlighter-rouge">.</code> is not on our <code class="highlighter-rouge">PATH</code>.
+If <code class="highlighter-rouge">.</code> were on our <code class="highlighter-rouge">PATH</code>, we could have typed just <code class="highlighter-rouge">backup.sh</code>.</p>
+
+<blockquote>
+  <p>It is very tempting to have <code class="highlighter-rouge">.</code> on your <code class="highlighter-rouge">PATH</code>, but it is a big security risk.
+If you <code class="highlighter-rouge">cd</code> to a directory with an executable file called, say, <code class="highlighter-rouge">ls</code> and you don’t notice, bad things might happen when you type the command <code class="highlighter-rouge">ls</code>.
+If <code class="highlighter-rouge">.</code> is on your <code class="highlighter-rouge">PATH</code> before <code class="highlighter-rouge">/bin</code> you will run the local command <code class="highlighter-rouge">./ls</code> instead of the official <code class="highlighter-rouge">/bin/ls</code>… and the local <code class="highlighter-rouge">ls</code> may be malicious and do something bad!</p>
+</blockquote>
+
+<p>Fourth, this script has no comments.
+We really should improve it; see <a href="/engs50/Examples/backup.sh">backup.sh</a>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="c">#</span>
+<span class="c"># backup.sh - make a backup copy of all the .c files in current directory</span>
+<span class="c">#</span>
+<span class="c"># usage: backup.sh</span>
+<span class="c"># (no arguments)</span>
+<span class="c">#</span>
+<span class="c"># input: none</span>
+<span class="c"># output: a line of confirmation for each file backed up</span>
+<span class="c">#</span>
+<span class="c"># David Kotz, April 2016</span>
+
+<span class="k">for </span>i <span class="k">in</span> <span class="k">*</span>.c
+<span class="k">do
+  </span><span class="nb">echo </span>back up <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span>
+  cp <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$i</span><span class="s2">.bak"</span>
+<span class="k">done
+
+</span><span class="nb">exit </span>0
+</code></pre></div></div>
+
+<p>It is good practice to identify the program, how its command-line should be used, and a description of what it does (if anything) with stdin and stdout.
+And to list the author name(s) and date.</p>
+
+<p>Notice the script returns the exit status <code class="highlighter-rouge">0</code>, which can be viewed using the <code class="highlighter-rouge">echo $?</code> command, as discussed earlier.
+The return status is typically not checked when scripts are run from the command line.
+However, when a script is called by another script the return status is typically checked - so it is important to return a meaningful exit status.</p>
+
+<p>We could continue to improve this script - for example, to catch errors from <code class="highlighter-rouge">cp</code> and do something intelligent, but let’s move on.</p>
+
+<h2 id="another-shell-script">Another shell script</h2>
+
+<p>If we go to all that trouble to save a backup copy of our <code class="highlighter-rouge">.c</code> files, it might be nice to see, later, what changed since we last made a backup.
+Let’s write a little script to compare the current versions with the backup copies.</p>
+
+<p>See <a href="/engs50/Examples/backup-diff.sh">backup-diff.sh</a></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="c">#</span>
+<span class="c"># backup-diff.sh - compare all the .c files in current directory with backup</span>
+<span class="c">#</span>
+<span class="c"># usage: backup-diff.sh</span>
+<span class="c"># (no arguments)</span>
+<span class="c">#</span>
+<span class="c"># input: none</span>
+<span class="c"># output: a line of information for each file, and diffs where they differ</span>
+<span class="c"># exit status: zero.</span>
+<span class="c">#</span>
+<span class="c"># David Kotz, March 2017</span>
+
+<span class="k">for </span>i <span class="k">in</span> <span class="k">*</span>.c
+<span class="k">do
+    if</span> <span class="o">[</span> <span class="o">!</span> <span class="nt">-r</span> <span class="s2">"</span><span class="nv">$i</span><span class="s2">.bak"</span> <span class="o">]</span>
+    <span class="k">then
+        </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span> - no backup 
+    <span class="k">else
+        if </span>cmp <span class="nt">--quiet</span> <span class="s2">"</span><span class="nv">$i</span><span class="s2">.bak"</span> <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span> 
+        <span class="k">then
+            </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span> unchanged
+        <span class="k">else
+            </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span> differences:
+            diff <span class="s2">"</span><span class="nv">$i</span><span class="s2">.bak"</span> <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span> 
+        <span class="k">fi
+    fi
+    
+    </span><span class="nb">echo
+</span><span class="k">done
+
+</span><span class="nb">exit </span>0
+</code></pre></div></div>
+
+<p><strong><a href="activity.html">Classroom activity</a>:</strong> modify this script to exit non-zero when missing backups or differences are found.</p>
+
+<h2 id="variables-and-arrays">Variables and arrays</h2>
+
+<p>Variables are typically not declared before they are used in scripts.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ a</span><span class="o">=</span>5
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ message</span><span class="o">=</span><span class="s2">"good morning"</span>
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$a</span>
+5
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$message</span>
+good morning
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="k">${</span><span class="nv">message</span><span class="k">}</span>
+good morning
+</code></pre></div></div>
+
+<p>Above we create two variables (<code class="highlighter-rouge">a</code> and <code class="highlighter-rouge">message</code>).
+The later commands show the <code class="highlighter-rouge">${varname}</code> syntax for variable substitution; this is the general form whereas <code class="highlighter-rouge">$varname</code> is a shorthand that works for simple cases; note that <code class="highlighter-rouge">${message}</code> is identical to <code class="highlighter-rouge">$message</code>.</p>
+
+<h2 id="repetition-the-while-command">Repetition: the while Command</h2>
+
+<p>The ‘for-loop’ construct is good for looping through a series of strings but not that useful when you do not know how many times the loop needs to run.
+The <code class="highlighter-rouge">while do</code> command is perfect for this.</p>
+
+<p>The contents of <a href="/engs50/Examples/guessprime.sh">guessprime.sh</a> use the ‘while-do’ construct.
+The script allows the user to guess a prime between 1-100.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="c">#</span>
+<span class="c"># File: guessprime.sh</span>
+<span class="c"># </span>
+<span class="c"># Description: The user tries to guess a prime between 1-100 </span>
+<span class="c"># This is not a good program. There is no check on what the</span>
+<span class="c"># user enters; it may not be a prime, or might be outside the range.</span>
+<span class="c"># Heck - it might not even be a number and might be empty!</span>
+<span class="c"># Some defensive programming would check the input.</span>
+<span class="c"># </span>
+<span class="c"># Input: The user guess a prime and enters it</span>
+<span class="c">#</span>
+<span class="c"># Output: Status on the guess</span>
+
+<span class="c"># Program defines a variable called prime and set it to a value.</span>
+
+<span class="nv">prime</span><span class="o">=</span>31
+
+<span class="nb">echo</span> <span class="nt">-n</span> <span class="s2">"Enter a prime between 1-100: "</span>
+<span class="nb">read </span>guess
+
+<span class="k">while</span> <span class="o">[</span> <span class="nv">$guess</span> <span class="o">!=</span> <span class="nv">$prime</span> <span class="o">]</span><span class="p">;</span> <span class="k">do
+    </span><span class="nb">echo</span> <span class="s2">"Wrong! try again"</span>
+    <span class="nb">echo</span> <span class="nt">-n</span> <span class="s2">"Enter a prime between 1-100: "</span>
+    <span class="nb">read </span>guess
+<span class="k">done
+</span><span class="nb">exit </span>0
+</code></pre></div></div>
+
+<p>This script uses user defined variables <code class="highlighter-rouge">prime</code> and <code class="highlighter-rouge">guess</code>.
+It introduces the <code class="highlighter-rouge">read</code> command, which pauses and waits for user input, placing that user input into the named variable.
+The <code class="highlighter-rouge">-n</code> switch to <code class="highlighter-rouge">echo</code> removes the newline usually produced by echo.
+Finally, note the semicolon after the <code class="highlighter-rouge">while</code> command and before the <code class="highlighter-rouge">do</code> command.
+As with the <code class="highlighter-rouge">if</code> command and its <code class="highlighter-rouge">then</code> branch, we could have put <code class="highlighter-rouge">do</code> on the next line if we prefer that style.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~/public_html/examples]<span class="nv">$ </span>./guessprime.sh 
+Guess a prime between 1-100: 33
+Wrong! try again
+Guess a prime between 1-100: 2
+Wrong! try again
+Guess a prime between 1-100: 9
+Wrong! try again
+Guess a prime between 1-100: 31
+<span class="o">[</span>cs50@flume ~/public_html/examples]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<h2 id="the-shells-variables">The shell’s variables</h2>
+
+<p>The shell maintains a number of important variables that are useful in writing scripts.
+We have come across some of them already.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  Variable            Description
+     $USER              username of current user
+     $HOME              pathname for the home directory of current user
+     $PATH              a list of directories to search for commands
+     $#                 number of parameters passed to the script
+     $0                 name of the shell script
+     $1, $2, .. $#      arguments given to the script
+     $*                 A list of all the parameters in a single variable.
+     $@                 A list of all the parameters in a single variable; always delimited
+     $$                 process ID of the shell script when running
+</code></pre></div></div>
+
+<p>The variable <code class="highlighter-rouge">$#</code> tells you how many arguments were on the command line; if there were three arguments, for example, they would be available as <code class="highlighter-rouge">$1</code>, <code class="highlighter-rouge">$2</code>, and <code class="highlighter-rouge">$3</code>.
+In the command line <code class="highlighter-rouge">myscript.sh a b c</code>, then, <code class="highlighter-rouge">$#=3</code>, <code class="highlighter-rouge">$0=myscript.sh</code>, <code class="highlighter-rouge">$1=a</code>, <code class="highlighter-rouge">$2=b</code>, and <code class="highlighter-rouge">$3=c</code>.</p>
+
+<p>The two variables <code class="highlighter-rouge">$*</code> and <code class="highlighter-rouge">$@</code> both provide the list of command-line arguments, but with subtle differences; try the following script, <a href="/engs50/Examples/args.sh">args.sh</a>, to see the difference.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+
+<span class="nb">echo</span> <span class="nv">$# </span>arguments to <span class="nv">$0</span>
+
+<span class="c"># loop through all the arguments, in four different waysf</span>
+<span class="nb">echo</span> <span class="s1">'for arg in $*'</span>
+<span class="k">for </span>arg <span class="k">in</span> <span class="nv">$*</span><span class="p">;</span> <span class="k">do </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$arg</span><span class="s2">"</span><span class="p">;</span> <span class="k">done
+
+</span><span class="nb">echo
+echo</span> <span class="s1">'for arg in "$*"'</span>
+<span class="k">for </span>arg <span class="k">in</span> <span class="s2">"</span><span class="nv">$*</span><span class="s2">"</span><span class="p">;</span> <span class="k">do </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$arg</span><span class="s2">"</span><span class="p">;</span> <span class="k">done
+
+</span><span class="nb">echo
+echo</span> <span class="s1">'for arg in $@'</span>
+<span class="k">for </span>arg <span class="k">in</span> <span class="nv">$@</span><span class="p">;</span> <span class="k">do </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$arg</span><span class="s2">"</span><span class="p">;</span> <span class="k">done
+
+</span><span class="nb">echo
+echo</span> <span class="s1">'for arg in "$@"'</span>
+<span class="k">for </span>arg <span class="k">in</span> <span class="s2">"</span><span class="nv">$@</span><span class="s2">"</span><span class="p">;</span> <span class="k">do </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$arg</span><span class="s2">"</span><span class="p">;</span> <span class="k">done
+
+</span><span class="nb">exit </span>0
+</code></pre></div></div>
+
+<p>Let’s try it on a command with four arguments; the fourth argument has an embedded space.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~/public_html/examples]<span class="nv">$ </span>./args.sh one two three <span class="s2">"and more"</span>
+4 arguments to ./args.sh
+<span class="k">for </span>arg <span class="k">in</span> <span class="nv">$*</span>
+one
+two
+three
+and
+more
+
+<span class="k">for </span>arg <span class="k">in</span> <span class="s2">"</span><span class="nv">$*</span><span class="s2">"</span>
+one two three and more
+
+<span class="k">for </span>arg <span class="k">in</span> <span class="nv">$@</span>
+one
+two
+three
+and
+more
+
+<span class="k">for </span>arg <span class="k">in</span> <span class="s2">"</span><span class="nv">$@</span><span class="s2">"</span>
+one
+two
+three
+and more
+<span class="o">[</span>cs50@flume ~/public_html/examples]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>Study the difference of each case.
+You should use <code class="highlighter-rouge">"$@"</code> to process command-line arguments, nearly always, because it retains the structure of those arguments.</p>
+
+<p>As a shorthand, <code class="highlighter-rouge">for arg</code> is equivalent to <code class="highlighter-rouge">for arg in "$@"</code>.</p>
+
+<blockquote>
+  <p>My choice of the variable name <code class="highlighter-rouge">arg</code> is immaterial to the shell.</p>
+</blockquote>
+
+<h2 id="printing-error-messages">Printing error messages</h2>
+
+<p>You might need to inform the user of an error; in this example, the 2nd argument is supposed to be a directory and the script found that it is not:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo </span>1&gt;&amp;2  Error: <span class="s2">"</span><span class="nv">$2</span><span class="s2">"</span> should be a directory
+</code></pre></div></div>
+
+<p>Here we see how to push the output of <code class="highlighter-rouge">echo</code>, normally to stdout (<code class="highlighter-rouge">1</code>), to the stderr (<code class="highlighter-rouge">2</code>) instead, by redirecting the stdout to the stderr using the confusing but useful redirect <code class="highlighter-rouge">1&gt;&amp;2</code>, which means ‘make the stdout go to the same place as the stderr’.</p>
+
+<h2 id="checking-arguments">Checking arguments</h2>
+
+<p>When writing scripts it is important to write defensive code that checks whether the input arguments are correct.
+Below, the program verifies that the command has exactly three arguments, using the ‘not equal to’ operator.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="o">[</span> <span class="nv">$# </span><span class="nt">-ne</span> 3 <span class="o">]</span><span class="p">;</span> <span class="k">then
+   </span><span class="nb">echo </span>1&gt;&amp;2 Usage: incorrect argument input
+   <span class="nb">exit </span>1
+<span class="k">fi</span>
+</code></pre></div></div>
+
+<p>Notice also that the script then exits with a non-zero status.</p>
+
+<h2 id="finally">Finally</h2>
+
+<p>From this week’s <a href="/engs50/Reading/#week-2">reading assignments</a>:</p>
+
+<ul>
+  <li>Comments should clarify the code, not obscure it.</li>
+  <li>They should enlighten, not impress.</li>
+  <li>If you used a special algorithm or text, mention it and give a reference!</li>
+  <li>Don’t just add noise or chitchat.</li>
+  <li>Say in comments what the code cannot.</li>
+</ul>
+
+<p>Don’t forget there are some good <code class="highlighter-rouge">bash</code> references on the <a href="/engs50/Resources/#bash">Resources</a> page.</p>
+
+<h1 id="other-stuff">Other stuff</h1>
+
+<p>There’s never enough time to show you all the good stuff in class.</p>
+
+<h2 id="simple-debugging-tips">Simple debugging tips</h2>
+
+<p>When you run a script you can use <code class="highlighter-rouge">printf</code> or <code class="highlighter-rouge">echo</code> to print debugging information to the screen.
+I found it helpful to define a function <code class="highlighter-rouge">debugPrint</code> so I can turn on and off all my debug statements in one place:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># print the arguments for debugging; comment-out 'echo' line to turn it off.</span>
+<span class="k">function </span>debugPrint<span class="o">()</span> <span class="o">{</span>
+<span class="c">#    echo "$@"</span>
+    <span class="k">return</span>
+<span class="o">}</span>
+...
+debugPrint starting to process arguments...
+<span class="k">for </span>arg<span class="p">;</span> <span class="k">do
+	</span>debugPrint processing <span class="s2">"</span><span class="nv">$arg</span><span class="s2">"</span>
+	...
+</code></pre></div></div>
+
+<p>If you get a syntax error; for example:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>./ziplab1.sh
+making a tarball called cs50-lab1.tgz
+./ziplab1.sh: line 18: syntax error near unexpected token <span class="sb">`</span><span class="k">else</span><span class="s1">'
+./ziplab1.sh: line 18: `else'</span>
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>The error is on or around line 18.
+In <code class="highlighter-rouge">emacs</code> edit the file ./count.sh again and then go to line 18 using the sequence of key strokes <code class="highlighter-rouge">ESC g</code> – that is, hit the <code class="highlighter-rouge">ESC</code> key and hit <code class="highlighter-rouge">g</code>.
+(If you did not install the customized <code class="highlighter-rouge">~cs50/.emacs</code> file in your own <code class="highlighter-rouge">~/.emacs</code>, you may need to hit <code class="highlighter-rouge">g</code> twice.) Then, enter the line number 18 and you will be brought to that line.
+Now fix the bug.
+(In my particular example, the actual error was on line 13, not 18; on line 13 the <code class="highlighter-rouge">if</code> statement began, but I forgot the semicolon before <code class="highlighter-rouge">then</code>…
+the shell finally realized a problem when it reached the <code class="highlighter-rouge">else</code> command at line 18.
+So you may need to work backwards through the code, looking carefully to find the syntax problem.</p>
+
+<p>Every time you launch <code class="highlighter-rouge">emacs</code> to edit a file, it saves a backup copy of that file.
+For example, when you edit <code class="highlighter-rouge">foo.sh</code> and save it, <code class="highlighter-rouge">emacs</code> saves the pre-editing version in <code class="highlighter-rouge">foo.sh~</code>.
+If you’re later wondering what changed,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>diff foo.sh~ foo.sh
+</code></pre></div></div>
+
+<p>will print the differences between the two files.</p>
+
+<h2 id="arrays">Arrays</h2>
+
+<p>Like variables, arrays are typically not declared before they are used in scripts.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ colors</span><span class="o">=(</span>red orange yellow green blue indigo violet<span class="o">)</span>
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$colors</span>
+red
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="k">${</span><span class="nv">colors</span><span class="p">[1]</span><span class="k">}</span>
+orange
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="k">${</span><span class="nv">colors</span><span class="p">[6]</span><span class="k">}</span>
+violet
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="k">${</span><span class="nv">colors</span><span class="p">[7]</span><span class="k">}</span>
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>Above we create one array (<code class="highlighter-rouge">colors</code>).
+Notice that <code class="highlighter-rouge">$colors</code> implicitly substitutes the first element, with index 0 (computer scientists like counting from zero).
+The later commands show the <code class="highlighter-rouge">${varname}</code> syntax for variable substitution; this is the general form whereas <code class="highlighter-rouge">$varname</code> is a shorthand that works for simple cases; note that <code class="highlighter-rouge">${message}</code> is identical to <code class="highlighter-rouge">$message</code> and <code class="highlighter-rouge">$colors</code> is equivalent to <code class="highlighter-rouge">${colors[0]}</code>.
+When desiring to subscript an array variable, you must use the full syntax, as in <code class="highlighter-rouge">${colors[1]}</code>.
+Finally, note that <code class="highlighter-rouge">${colors[7]}</code> is empty because it was not defined.</p>
+
+<p>Even cooler, the array can be used in combination with file subsitution <code class="highlighter-rouge">$(&lt;filename)</code> and command substitution <code class="highlighter-rouge">$(command)</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">cat </span>LFlist
+John.P.Kotz.19@dartmouth.edu
+joel.j.katticaran.ug@dartmouth.edu
+Kaya.M.Thomas.17@dartmouth.edu
+trevor.l.davis.18@dartmouth.edu
+Thomas.D.Kim.19@dartmouth.edu
+kyle.dotterrer.18@dartmouth.edu
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ lfs</span><span class="o">=(</span><span class="k">$(</span>&lt;LFlist<span class="k">)</span><span class="o">)</span>
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="k">${</span><span class="nv">lfs</span><span class="p">[3]</span><span class="k">}</span>
+trevor.l.davis.18@dartmouth.edu
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ juniors</span><span class="o">=(</span><span class="k">$(</span><span class="nb">grep</span> .18. LFlist<span class="k">)</span><span class="o">)</span>
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="k">${</span><span class="nv">juniors</span><span class="p">[1]</span><span class="k">}</span>
+kyle.dotterrer.18@dartmouth.edu
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="k">${</span><span class="nv">lfs</span><span class="p">[*]</span><span class="k">}</span>
+John.P.Kotz.19@dartmouth.edu joel.j.katticaran.ug@dartmouth.edu Kaya.M.Thomas.17@dartmouth.edu trevor.l.davis.18@dartmouth.edu Thomas.D.Kim.19@dartmouth.edu kyle.dotterrer.18@dartmouth.edu
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
+
+</code></pre></div></div>
+
+<p>The last line demonstrates how you can substitute all values of the array, with the <code class="highlighter-rouge">[*]</code> index.</p>
+
+<h2 id="let-me-do-arithmetic"><code class="highlighter-rouge">let</code> me do arithmetic!</h2>
+
+<p>The <code class="highlighter-rouge">let</code> command carries out arithmetic operations on variables.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">let </span><span class="nv">a</span><span class="o">=</span>1
+
+<span class="nv">$ </span><span class="nb">let </span><span class="nv">b</span><span class="o">=</span>2
+
+<span class="nv">$ </span><span class="nb">let </span>c <span class="o">=</span> a + b
+<span class="nt">-bash</span>: <span class="nb">let</span>: <span class="o">=</span>: syntax error: operand expected <span class="o">(</span>error token is <span class="s2">"="</span><span class="o">)</span>
+
+<span class="c"># ... note, the let command is sensitive to spaces.</span>
+
+<span class="nv">$ </span><span class="nb">let </span><span class="nv">c</span><span class="o">=</span>a+b
+
+<span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$c</span>
+3
+
+<span class="nv">$ </span><span class="nb">echo</span> <span class="s2">"a+b=</span><span class="nv">$c</span><span class="s2">"</span>
+a+b<span class="o">=</span>3
+
+<span class="nv">$ </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$a</span><span class="s2">+</span><span class="nv">$b</span><span class="s2">=</span><span class="nv">$c</span><span class="s2">"</span>
+1+2<span class="o">=</span>3
+
+<span class="nv">$ </span><span class="nb">let </span>a<span class="k">*</span><span class="o">=</span>10  <span class="c"># equivalent to  let a=a*10</span>
+<span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$a</span>
+10
+
+</code></pre></div></div>
+
+<h2 id="temporary-files">Temporary files</h2>
+
+<p>If your script needs to create some temporary files to do its work, it is good practice to create those files in a place <em>other than the current directory</em>, and with a filename that is unlikely to be used by another script - even another concurrently running copy of your script.</p>
+
+<p>The directory <code class="highlighter-rouge">/tmp</code> is writable by everyone - so it’s not a great place to put important files - and is the conventional place to put temporary files.
+To avoid picking a name that others might pick, scripts include <code class="highlighter-rouge">$$</code>, their process identifier, as part of the filename.
+For example, a script <code class="highlighter-rouge">print</code> might do the following:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="c"># build up an output file, then print it</span>
+<span class="c"># name of temporary file includes our process id $$</span>
+<span class="nv">tmpfile</span><span class="o">=</span>/tmp/print<span class="nv">$$</span>
+<span class="nb">echo</span> <span class="o">&gt;</span> <span class="nv">$tmpfile</span>
+
+<span class="k">for </span>arg
+<span class="k">do</span>
+	<span class="c"># print a nice header then the file</span>
+	<span class="nb">echo</span> <span class="s2">"======================"</span> <span class="o">&gt;&gt;</span> <span class="nv">$tmpfile</span>
+	<span class="nb">echo</span> <span class="s2">"</span><span class="nv">$arg</span><span class="s2">"</span> <span class="o">&gt;&gt;</span> <span class="nv">$tmpfile</span>
+	<span class="nb">cat</span> <span class="s2">"</span><span class="nv">$arg</span><span class="s2">"</span> <span class="o">&gt;&gt;</span> <span class="nv">$tmpfile</span>
+	<span class="nb">echo</span> <span class="o">&gt;&gt;</span> <span class="nv">$tmpfile</span>
+<span class="k">done
+
+</span>lpr <span class="nv">$tmpfile</span>		<span class="c"># print the result</span>
+rm <span class="nt">-f</span> <span class="nv">$tmpfile</span>	<span class="c"># clean up after ourself</span>
+<span class="nb">exit </span>0
+</code></pre></div></div>
+
+<p>We use a variable <code class="highlighter-rouge">tmpfile</code> for clarity and consistency throughout the script.</p>
+
+<h2 id="catching-interrupts-cleaning-up">Catching interrupts, cleaning up</h2>
+
+<p>Many scripts create intermediate or temporary files, and might leave a mess if interrupted part-way through their operation.</p>
+
+<p>The <code class="highlighter-rouge">trap</code> command can catch such interrupts, such as those caused by the user typing <code class="highlighter-rouge">ctrl-C</code> at the keyboard while the script works.
+It is good form to catch this interrupt and clean up before exiting.
+In the above example, we would extend the above example as follows:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># name of temporary file includes our process id $$</span>
+<span class="nv">tmpfile</span><span class="o">=</span>/tmp/print<span class="nv">$$</span>
+<span class="nb">trap</span> <span class="s2">"rm -f </span><span class="nv">$tmpfile</span><span class="s2">"</span> EXIT
+</code></pre></div></div>
+
+<p>This <code class="highlighter-rouge">trap</code> command gives the shell a command to run whenever the script exits, for any reason (whether due to an <code class="highlighter-rouge">exit</code> command or due to an interrupt that kills the process).
+Very handy!
+Notice that I define the <code class="highlighter-rouge">trap</code> <em>immediately</em> after defining the variable name, so that it will be in effect whenever the temporary file is later created.
+The <code class="highlighter-rouge">-f</code> flag (‘force’) to <code class="highlighter-rouge">rm</code> causes it to override some kinds of errors, notably, to not complain if the <code class="highlighter-rouge">$tmpfile</code> does not yet exist.</p>
+
+<p>Sometimes you need a whole directory for your temporary use:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">tmpdir</span><span class="o">=</span>/tmp/print<span class="nv">$$</span>
+<span class="nb">trap</span> <span class="s2">"rm -rf </span><span class="nv">$tmpdir</span><span class="s2">"</span> EXIT
+mkdir <span class="nt">-p</span> <span class="nv">$tmpdir</span>
+<span class="nb">cd</span> <span class="nv">$tmpdir</span>
+</code></pre></div></div>
+
+<p>Here I used <code class="highlighter-rouge">mkdir -p</code> to make the directory, and <code class="highlighter-rouge">rm -rf</code> to recursively remove it.</p>
+
+<h2 id="functions">Functions</h2>
+
+<p>Like most procedural languages, shell scripts have structure and function support.
+Typically, it is a good idea to use functions to make scripts more readable and structured.
+In what follows, we simply add a function to guessprime  to create <a href="/engs50/Examples/guessprimefunction.sh">guessprimefunction.sh</a>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="c">#</span>
+<span class="c"># File: guessprimefunction.sh (variant of guessprime.sh)</span>
+<span class="c"># </span>
+<span class="c"># Description: The user tries to guess a prime between 1-100 </span>
+<span class="c"># This is not a good program. There is no check on what the</span>
+<span class="c"># user enters; it may not be a prime, or might be outside the range.</span>
+<span class="c"># Heck - it might not even be a number and might be empty!</span>
+<span class="c"># Some defensive programming would check the input.</span>
+<span class="c"># </span>
+<span class="c"># Input: The user guess a prime and enters it</span>
+<span class="c">#</span>
+<span class="c"># Output: Status on the guess</span>
+
+<span class="c"># Ask the user to guess, and fill global variable $guess with result.</span>
+<span class="c"># usage: askguess low high</span>
+<span class="c">#   where [low, high] is the range of numbers in which they should guess.</span>
+<span class="k">function </span>askguess<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">echo</span> <span class="nt">-n</span> <span class="s2">"Enter a prime between </span><span class="nv">$1</span><span class="s2">-</span><span class="nv">$2</span><span class="s2">: "</span>
+    <span class="nb">read </span>guess
+<span class="o">}</span>
+
+<span class="c"># Program defines a variable called prime and set it to a value.</span>
+
+<span class="nv">prime</span><span class="o">=</span>31
+
+<span class="c"># ask them once</span>
+askguess 1 100
+
+<span class="k">while</span> <span class="o">[</span> <span class="nv">$guess</span> <span class="o">!=</span> <span class="nv">$prime</span> <span class="o">]</span><span class="p">;</span> <span class="k">do</span>
+    <span class="c"># ask again</span>
+    askguess 1 100
+<span class="k">done
+</span><span class="nb">exit </span>0
+</code></pre></div></div>
+
+<p>Notice that defining a function effectively adds a new command to the shell, in this case, <code class="highlighter-rouge">askguess</code>.
+And that command can have arguments!
+And those arguments are available within the function as if they were command-line arguments <code class="highlighter-rouge">$1</code>, <code class="highlighter-rouge">$2</code>, and so forth.
+All other variables are treated as ‘global’ variables, like <code class="highlighter-rouge">guess</code> in this example.</p>
+
+<p>Try this script; it’s very fragile.
+See what happens when you enter nothing - just hit return at the prompt for a guess.
+Why does that happen?</p>
+
+<h2 id="another-example-submitx">Another example: submitx</h2>
+
+<p>To submit your Lab solutions you use a command <code class="highlighter-rouge">~cs50/labs/submit</code>, which actually just runs a bash script <code class="highlighter-rouge">~cs50/labs/submitx</code>.
+You can learn many things from this example; note the frequent checks for possible problems, the carefully quoted variable instantiations, the command chains with <code class="highlighter-rouge">&amp;&amp;</code> to ensure that a command sequence stops at the first error, and only reaches <code class="highlighter-rouge">exit 0</code> if they all succeed without error, and the use of <code class="highlighter-rouge">\</code> to break long lines into readable sequences.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="c">#</span>
+<span class="c"># Submit a homework assignment in CS50.</span>
+<span class="c"># The assignment must in in ~/cs50/labs/labN, where N is [1..9].</span>
+<span class="c"># The entire directory is copied to ~cs50/submit/labs/labN/username,</span>
+<span class="c"># where username is the $USER of the user that runs this script.</span>
+<span class="c">#</span>
+<span class="c"># usage: submit N [extension]</span>
+<span class="c"># where N is [1..9]</span>
+<span class="c"># where the optional second word is literally "extension" and is used</span>
+<span class="c"># to indicate that the student wants to claim an extension on this assignment.</span>
+<span class="c"># (In that case, all previously submitted files are deleted.)</span>
+
+<span class="nv">usage</span><span class="o">=</span><span class="s2">"usage: </span><span class="nv">$0</span><span class="s2"> N [extension]    -- where N is [1..9]"</span>
+
+<span class="c"># Check arguments</span>
+<span class="k">if</span> <span class="o">[[</span> <span class="nv">$# </span><span class="nt">-eq</span> 0 <span class="o">||</span> <span class="nv">$# </span><span class="nt">-gt</span> 2 <span class="o">]]</span>
+<span class="k">then
+    </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$usage</span><span class="s2">"</span>
+    <span class="nb">exit </span>1
+<span class="k">fi
+
+if</span> <span class="o">[[</span> <span class="nv">$# </span><span class="nt">-eq</span> 2 <span class="o">]]</span>
+<span class="k">then if</span> <span class="o">[[</span> <span class="s2">"</span><span class="nv">$2</span><span class="s2">"</span> <span class="o">==</span> <span class="s2">"extension"</span> <span class="o">]]</span>
+     <span class="k">then
+	 </span><span class="nv">extension</span><span class="o">=</span>1
+     <span class="k">else
+	 </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$usage</span><span class="s2">"</span>
+	 <span class="nb">exit </span>1
+     <span class="k">fi
+fi
+
+</span><span class="nb">let</span> <span class="s2">"N=</span><span class="nv">$1</span><span class="s2">"</span>
+<span class="k">if</span> <span class="o">[[</span> <span class="nv">$N</span> <span class="nt">-lt</span> 1 <span class="o">||</span> <span class="nv">$N</span> <span class="nt">-gt</span> 9 <span class="o">]]</span>
+<span class="k">then
+    </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$usage</span><span class="s2">"</span>
+    <span class="nb">exit </span>2
+<span class="k">fi
+
+</span><span class="nv">lab</span><span class="o">=</span>lab<span class="nv">$N</span>
+
+<span class="c"># destination of their files</span>
+<span class="nv">dest</span><span class="o">=</span>~cs50/labs/submissions/<span class="nv">$lab</span>/<span class="nv">$USER</span>
+
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$extension</span> <span class="o">]</span>
+<span class="k">then
+   </span><span class="nb">echo </span>Requesting extension <span class="k">for</span> <span class="nv">$lab</span><span class="nb">.</span>
+<span class="k">else
+   </span><span class="nb">echo </span>Submitting <span class="nv">$lab</span><span class="nb">.</span>
+
+   <span class="c"># check their cs50 directory</span>
+   <span class="k">if</span> <span class="o">[[</span> <span class="o">!</span> <span class="nt">-d</span> ~/cs50 <span class="o">]]</span>
+   <span class="k">then
+       </span><span class="nb">echo</span> <span class="s1">'oops! you are missing a ~/cs50 directory.'</span>
+       <span class="nb">exit </span>3
+   <span class="k">fi
+   
+   </span><span class="nb">echo </span>Ensuring that your CS50 directory is not visible by any other user...
+   <span class="k">if </span>chmod go-rwx ~/cs50
+   <span class="k">then
+       </span><span class="nb">echo </span>good.
+   <span class="k">else
+       </span><span class="nb">echo</span> <span class="s1">'Failed: unable to set permissions on your ~/cs50 directory.'</span>
+       <span class="nb">echo </span>They are:
+       <span class="nb">ls</span> <span class="nt">-ld</span> ~/cs50
+       <span class="nb">exit </span>3
+   <span class="k">fi</span>
+
+   <span class="c"># Prepare to copy from 'source' to 'dest'</span>
+   <span class="nb">source</span><span class="o">=</span>~/cs50/labs/<span class="nv">$lab</span>
+   
+   <span class="nb">echo </span>Checking <span class="nb">source </span>directory <span class="s2">"</span><span class="nv">$source</span><span class="s2">"</span>...
+   <span class="k">if</span> <span class="o">[[</span> <span class="o">!</span> <span class="nt">-d</span> <span class="s2">"</span><span class="nv">$source</span><span class="s2">"</span> <span class="o">]]</span>
+   <span class="k">then
+       </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$source</span><span class="s2"> does not exist or is not a directory;"</span>
+       <span class="nb">echo</span> <span class="s2">"did you put your lab in the right place?"</span>
+       <span class="nb">exit </span>4
+   <span class="k">fi
+   
+   if</span> <span class="o">[[</span> <span class="o">!</span> <span class="nt">-x</span> <span class="s2">"</span><span class="nv">$source</span><span class="s2">"</span> <span class="o">||</span> <span class="o">!</span> <span class="nt">-r</span> <span class="s2">"</span><span class="nv">$source</span><span class="s2">"</span> <span class="o">]]</span>
+   <span class="k">then
+       </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$source</span><span class="s2"> is not searchable or not readable:"</span>
+       <span class="nb">ls</span> <span class="nt">-ld</span> <span class="s2">"</span><span class="nv">$source</span><span class="s2">"</span>
+       <span class="nb">exit </span>5
+   <span class="k">else
+       </span><span class="nb">echo </span>good.
+   <span class="k">fi
+fi
+  
+</span><span class="nb">echo </span>Checking destination directory <span class="s2">"</span><span class="nv">$dest</span><span class="s2">"</span>...
+<span class="k">if  </span>mkdir <span class="nt">-p</span> <span class="s2">"</span><span class="nv">$dest</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> chmod o-rwx <span class="s2">"</span><span class="nv">$dest</span><span class="s2">"</span>
+<span class="k">then
+    </span><span class="nb">echo </span>good.
+<span class="k">else
+    </span><span class="nb">echo </span>cannot make directory <span class="s2">"</span><span class="nv">$dest</span><span class="s2">"</span>
+    <span class="nb">exit </span>6
+<span class="k">fi
+
+if</span> <span class="o">[</span> <span class="nv">$extension</span> <span class="o">]</span>
+<span class="k">then
+   </span><span class="nb">echo </span>Removing previously submitted files, <span class="k">if </span>any...
+   rm <span class="nt">-rf</span> <span class="s2">"</span><span class="nv">$dest</span><span class="s2">/"</span><span class="k">*</span>
+   <span class="nb">echo </span>Marking your submission as an extension...
+   date <span class="o">&gt;</span> <span class="nv">$dest</span>/EXTENSION <span class="se">\</span>
+   <span class="o">&amp;&amp;</span> chgrp <span class="nt">-R</span> cs50 <span class="s2">"</span><span class="nv">$dest</span><span class="s2">"</span> <span class="se">\</span>
+   <span class="o">&amp;&amp;</span> chmod <span class="nt">-R</span> <span class="nv">g</span><span class="o">=</span>u <span class="s2">"</span><span class="nv">$dest</span><span class="s2">"</span> <span class="se">\</span>
+   <span class="o">&amp;&amp;</span> chmod g+rwx <span class="s2">"</span><span class="nv">$dest</span><span class="s2">"</span> <span class="se">\</span>
+   <span class="o">&amp;&amp;</span> chmod o-rwx <span class="s2">"</span><span class="nv">$dest</span><span class="s2">"</span> <span class="se">\</span>
+   <span class="o">&amp;&amp;</span> <span class="nb">echo </span>success! <span class="nv">$lab</span> extension requested. <span class="se">\</span>
+   <span class="o">&amp;&amp;</span> <span class="nb">cat</span> <span class="nv">$dest</span>/EXTENSION <span class="se">\</span>
+   <span class="o">&amp;&amp;</span> <span class="nb">exit </span>0
+<span class="k">else
+    </span><span class="nb">echo </span>Copying new or changed files...
+    rsync <span class="nt">-aHv</span> <span class="nt">--delete</span> <span class="s2">"</span><span class="nv">$source</span><span class="s2">/"</span> <span class="s2">"</span><span class="nv">$dest</span><span class="s2">/"</span> <span class="se">\</span>
+	<span class="o">&amp;&amp;</span> chgrp <span class="nt">-R</span> cs50 <span class="s2">"</span><span class="nv">$dest</span><span class="s2">"</span> <span class="se">\</span>
+	<span class="o">&amp;&amp;</span> chmod <span class="nt">-R</span> <span class="nv">g</span><span class="o">=</span>u <span class="s2">"</span><span class="nv">$dest</span><span class="s2">"</span> <span class="se">\</span>
+	<span class="o">&amp;&amp;</span> chmod g+rwx <span class="s2">"</span><span class="nv">$dest</span><span class="s2">"</span> <span class="se">\</span>
+	<span class="o">&amp;&amp;</span> chmod o-rwx <span class="s2">"</span><span class="nv">$dest</span><span class="s2">"</span> <span class="se">\</span>
+	<span class="o">&amp;&amp;</span> <span class="nb">echo </span>success! <span class="nv">$lab</span> submitted <span class="se">\</span>
+	<span class="o">&amp;&amp;</span> date <span class="se">\</span>
+	<span class="o">&amp;&amp;</span> <span class="nb">exit </span>0
+<span class="k">fi
+
+</span><span class="nb">echo </span>Failed!
+<span class="nb">exit </span>99
+
+</code></pre></div></div>
 
   </div>
 

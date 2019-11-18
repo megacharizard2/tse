@@ -17,6 +17,7 @@ pthread_mutex_t hashlock;
 
 typedef struct params {
 	int depth;
+	char* seedurl;
 	char* dirname;
 	lqueue_t* lqueue;
 	lhash_t* lhash;
@@ -116,17 +117,17 @@ void* threader(void* parameter){
 	printf("starts threader going\n");
 	bool isinactive = false;
 	params_t* param = (params_t*)parameter;
-	/*char* seedURL = param->seedURL;*/
+	/*	char* seedURL = param->seedurl;*/
 	char* dirname = param->dirname;
 	int maxdepth = param->depth;
-	/*char* urlcopy = assertp(malloc(strlen(seedURL)+1), "url copy\n");
-  strcpy(urlcopy,seedURL);*/
+	/*	char* urlcopy = assertp(malloc(strlen(seedURL)+1), "urlcopy\n");
+			strcpy(urlcopy,seedURL);*/
   lqueue_t *tocrawl=param->lqueue; 
 	lhash_t* seenURLs=param->lhash;
 	printf("housekeeping done with\n");
   webpage_t* page;
   while (stillgoing != 0){
-		printf("enters big dog loop\n");
+		printf("entering larger loop\n");
 		if ((page = lqget(tocrawl)) != NULL) {
 			if(isinactive==true){
 				pthread_mutex_lock(&stillgoinglock);
@@ -190,8 +191,7 @@ void* threader(void* parameter){
 
 			}
 		}
-	}
-	/*
+	}/*
 	free(urlcopy);
 	urlcopy=NULL;*/
 	return NULL;
@@ -249,6 +249,7 @@ int main(int argc,char* argv[]){
 	params_t* param=(params_t*)malloc(sizeof(params_t));
 	printf("malloced\n");
 	param->depth=depth;
+	param->seedurl=seedURL;
 	param->dirname=pageDirectory;
 	param->lqueue=lqueue;
 	param->lhash=lhash;
