@@ -51,7 +51,7 @@ int32_t lqput(lqueue_t *lqp, void *elementp) {
 void* lqget(lqueue_t *lqp) {
 	pthread_mutex_lock(&m);
 	lqueue_s* lqueue = (lqueue_s*)lqp;
-	void* item = lqget(lqueue->q);
+	void* item = qget(lqueue->q);
 	pthread_mutex_unlock(&m);
 	return item;
 }

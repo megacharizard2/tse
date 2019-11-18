@@ -126,12 +126,14 @@ void* threader(void* parameter){
   lqueue_t *tocrawl=param->lqueue; 
 	lhash_t* seenURLs=param->lhash;
 	printf("housekeeping done with\n");
-	if(lqget(tocrawl)==NULL){
+	lqget(tocrawl);
+	printf("value is \n");
+	if((lqget(tocrawl))==NULL){
 		printf("no queue to crawl\n");
-		if((lqput(tocrawl,web))==1){
+		if((lqput(tocrawl,web))==0){
 			printf("entered base page  into queue\n");
 		}
-		if((lhput(seenURLs,urlcopy,urlcopy,strlen(urlcopy)))==1){
+		if((lhput(seenURLs,urlcopy,urlcopy,strlen(urlcopy)))==0){
 				printf("entered into hash\n");
 		}
 	}
