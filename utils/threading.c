@@ -17,7 +17,6 @@ pthread_mutex_t hashlock;
 
 typedef struct params {
 	int depth;
-	char* seedURL;
 	char* dirname;
 	lqueue_t* lqueue;
 	lhash_t* lhash;
@@ -117,11 +116,11 @@ void* threader(void* parameter){
 	printf("starts threader going\n");
 	bool isinactive = false;
 	params_t* param = (params_t*)parameter;
-	char* seedURL = param->seedURL;
+	/*char* seedURL = param->seedURL;*/
 	char* dirname = param->dirname;
 	int maxdepth = param->depth;
-	char* urlcopy = assertp(malloc(strlen(seedURL)+1), "url copy\n");
-  strcpy(urlcopy,seedURL);
+	/*char* urlcopy = assertp(malloc(strlen(seedURL)+1), "url copy\n");
+  strcpy(urlcopy,seedURL);*/
   lqueue_t *tocrawl=param->lqueue; 
 	lhash_t* seenURLs=param->lhash;
 	printf("housekeeping done with\n");
@@ -137,7 +136,7 @@ void* threader(void* parameter){
 			}
 			bool fetchsuccess=webpage_fetch(page);
 			if (fetchsuccess != true){
-				printf("could not extract HTML from page %s\n",urlcopy);
+				printf("could not extract HTML from page");
 				webpage_delete(page);
 				continue;
 			}
@@ -192,6 +191,9 @@ void* threader(void* parameter){
 			}
 		}
 	}
+	/*
+	free(urlcopy);
+	urlcopy=NULL;*/
 	return NULL;
 }
 	
@@ -247,7 +249,6 @@ int main(int argc,char* argv[]){
 	params_t* param=(params_t*)malloc(sizeof(params_t));
 	printf("malloced\n");
 	param->depth=depth;
-	param->seedURL=seedURL;
 	param->dirname=pageDirectory;
 	param->lqueue=lqueue;
 	param->lhash=lhash;
@@ -271,9 +272,8 @@ int main(int argc,char* argv[]){
 	}
 	fflush(stdout);
 	free(param);
-	lhapply(lhash,printfn);
-	lhapply(lhash,deletestring);
+	/*lhapply(lhash,printfn);*/
+	/*lhapply(lhash,deletestring);*/
 	lhclose(lhash);
 	lqclose(lqueue);
-	webpage_delete(web);
 }

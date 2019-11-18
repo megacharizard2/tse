@@ -58,5 +58,5 @@ threading: threading.o locked-queue.o locked-hash.o webpage.o queue.o hash.o
 	gcc $(CFLAGS) threading.o locked-hash.o locked-queue.o webpage.o queue.o hash.o $(LIBS) -o threading
 
 clean:
-	rm -rf webpage.o tools.o queue.o hash.o indexio.o locked-queue.o lqtest1.o lhashtest1.o lhashtest2.o lqtest1 lqtest2 lqtest2.o lhashtest3.o lhashtest3 lhashtest1 lhashtest2 threading.o threading *~
+	rm -rf webpage.o tools.o indexio.o locked-queue.o lqtest1.o lhashtest1.o lhashtest2.o lqtest1 lqtest2 lqtest2.o lhashtest3.o lhashtest3 lhashtest1 lhashtest2 threading.o threading *~
 
