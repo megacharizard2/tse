@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/iterators/activity.html
+https://thayer.github.io/engs50/Notes/indexer/activity.html
 3
-2594
+2464
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/iterators/activity.html
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Activity - Set intersection</title>
+  <title>Activity - Design of TSE Indexer</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/iterators/activity.html">
+  <link rel="canonical" href="/engs50/Notes/indexer/activity.html">
 </head>
 
 
@@ -44,25 +44,21 @@ https://thayer.github.io/engs50/Notes/iterators/activity.html
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Activity - Set intersection</h1>
+    <h1 class="post-title">Activity - Design of TSE Indexer</h1>
   </header>
 
   <div class="post-content">
     <ol>
   <li>
-    <p>Review <a href="/engs50/Examples/set_iterate2.c">set_iterate2</a>.
-(Note also <a href="/engs50/Examples/set_iterate.makefile">set_iterate.makefile</a>.)
-It shows how to construct the <em>union</em> of two sets.</p>
+    <p>Review the <a href="/engs50/Labs/Lab5/REQUIREMENTS.html">Indexer Requirements spec</a>.</p>
   </li>
   <li>
-    <p>Discuss how you would construct the <em>intersection</em> of two sets - it’s very analogous, but a bit trickier.
-(I found that the<code class="highlighter-rouge">itemfunc</code> needed a pointer to each set, not just the one set, as in the example above.)</p>
+    <p>What data structure would be a good representation for the <em>inverted index</em>?
+An inverted index allows maps from <em>words</em> to <em>document IDs</em> - given a word, which documents contain that word?
+And for each document, you’ll want to know how many times did that word appear in that document.</p>
   </li>
 </ol>
 
-<blockquote>
-  <p>You’ll need this for Lab 6!</p>
-</blockquote>
 
   </div>
 

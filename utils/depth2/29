@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/unittest/
+https://thayer.github.io/engs50/Notes/cohesion/
 2
-22745
+11260
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/unittest/
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Unit testing</title>
+  <title>Cohesion and coupling</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/unittest/">
+  <link rel="canonical" href="/engs50/Notes/cohesion/">
 </head>
 
 
@@ -44,234 +44,200 @@ https://thayer.github.io/engs50/Notes/unittest/
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Unit testing</h1>
+    <h1 class="post-title">Cohesion and coupling</h1>
   </header>
 
   <div class="post-content">
-    <p>The goal of effective unit testing is to isolate each functional part of the system and to demonstrate that each of those parts is working properly.</p>
+    <h3 id="goals">Goals</h3>
 
-<p>A short online reference is Jeff Canna’s <em><a href="http://www.ibm.com/developerworks/library/j-test.html">Testing, Fun, Really</a></em>.
-Although he is talking mostly about Java, his insights on unit testing are superb.</p>
-
-<blockquote>
-  <p>“Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.” – Jeff Canna, <em><a href="http://www.ibm.com/developerworks/library/j-test.html">Testing, Fun, Really</a></em>.</p>
-</blockquote>
-
-<blockquote>
-  <p>“Unit tests are written from the developer’s perspective and focus on particular methods of the class under test.” – Jeff Canna, <em><a href="http://www.ibm.com/developerworks/library/j-test.html">Testing, Fun, Really</a></em>.</p>
-</blockquote>
-
-<p>Use these guidelines when writing unit tests (from Jeff Canna, <em><a href="http://www.ibm.com/developerworks/library/j-test.html">Testing, Fun, Really</a></em>):</p>
+<p>to discuss</p>
 
 <ul>
-  <li>“Write the unit test before writing code for class it tests.</li>
-  <li>“Capture code comments in unit tests.</li>
-  <li>“Test all the public methods that perform an “interesting” function (that is, not getters and setters, unless they do their getting and setting in some unique way).</li>
-  <li>“Put each test case in the same package as the class it’s testing to gain access to package and protected members.</li>
-  <li>“Avoid using domain-specific objects in unit tests.”</li>
+  <li><em>routines</em> - types and names</li>
+  <li><em>cohesion</em> - and why we want strong cohesion</li>
+  <li><em>coupling</em> - and why we want weak coupling</li>
 </ul>
 
-<h3 id="unit-testing-of-our-binary-tree">Unit testing of our binary tree</h3>
+<p>The concepts in today’s lecture come from chapter 5 of <em>Code Complete</em> by Steve McConnell. [Microsoft Press, 1993.]</p>
 
-<p>Today’s Terminal <a href="/engs50/Notes/unittest/script.txt">script</a> is available.</p>
+<h2 id="routines">Routines</h2>
 
-<p>Unzip the <a href="/engs50/Examples/trees.zip">tree examples file</a>. The tree9 example
-demonstrated a binary-tree data structure. Here we enhance it to become treeA (to a computer scientist, <code class="highlighter-rouge">A</code> comes next after <code class="highlighter-rouge">9</code>).</p>
+<p>We often use the word <em>routine</em> as a general concept, to refer to  a <em>function</em> or a <em>procedure</em>.
+We typically use the word <em>procedure</em> to refer to a function with no return value.
+In other languages, routines might be called <em>subroutines</em> or <em>methods</em>.</p>
 
-<p>Look at treeA/tree.c and its Makefile and you’ll notice three things:</p>
+<p>There are many reasons to break a program into <em>routines</em>:</p>
 
 <ul>
-  <li>The code now has a <code class="highlighter-rouge">main()</code> function at the bottom of the file.
-It is protected inside <code class="highlighter-rouge">#ifdef UNIT_TEST ... #endif</code> so it is only compiled-in when we want to compile a unit test.</li>
-  <li>Preceding <code class="highlighter-rouge">main()</code> is an <code class="highlighter-rouge">#include "unittest.h"</code> to pick up several <em>preprocessor macros</em>, which we explain below.</li>
-  <li>The <code class="highlighter-rouge">Makefile</code> now has a <code class="highlighter-rouge">unittest</code> target, which builds a distinct executable, and a <code class="highlighter-rouge">unit</code> target, which runs it.</li>
+  <li>Reduce complexity</li>
+  <li>Avoid duplicate code</li>
+  <li>Limit effects of changes (narrow scope of change to a routine)</li>
+  <li>Hide sequences (a form of information hiding)</li>
+  <li>Improve performance (optimize in one place)</li>
+  <li>Centralize control (e.g., controlling devices, files, data structures… more information hiding)</li>
+  <li>Hide data structures (ADTs)</li>
+  <li>Hide global data (access routines centralize control of globals)</li>
+  <li>Hide pointer operations (makes it easier to read)</li>
+  <li>Promote code reuse (easier to reuse code in a routine)</li>
+  <li>Plan for a family of programs (isolate parts that may change in a few routines)</li>
+  <li>Improve readability (named routine is more readable; avoid deep nesting, etc)</li>
+  <li>Improve portability (isolate nonportable features)</li>
+  <li>Isolate complex operations (algorithm, protocols, etc)</li>
+  <li>Isolate use of nonstandard language functions (isolate nonportable features)</li>
+  <li>Simplify complicated boolean tests (inlines are great here)</li>
+</ul>
+
+<p>Routines should be well named:</p>
+
+<ul>
+  <li>a <em>procedure</em> name should be a strong verb followed by object (like <em>printCalendar()</em>).</li>
+  <li>a <em>function</em> name should describe its return value (like <em>numberOfNonzeros()</em>).</li>
+  <li>a <em>boolean function</em> name should sound like a question (like <em>IsInternalURL()</em>).</li>
+</ul>
+
+<p>A good routine name</p>
+
+<ul>
+  <li>avoids meaningless verbs (like <em>do</em>, <em>perform</em>)</li>
+  <li>describes everything the routine does</li>
+  <li>is as long as necessary</li>
+  <li>follows naming conventions!</li>
+</ul>
+
+<p>A routine’s body should not be <strong>too long</strong>.
+If you find your routine approaching 200 lines, you should break it up - or have a darn good reason you should not break it up.</p>
+
+<h3 id="cohesion">Cohesion</h3>
+
+<blockquote>
+  <p>“Cohesion refers to how closely [or strongly] the operations in a routine are related.” – McConnell</p>
+</blockquote>
+
+<p>One study found that 50% of high-cohesion routines were fault-free, while 18% of low-cohesion routines were fault-free.</p>
+
+<p>Good routines have <strong><em>strong cohesion</em></strong>.</p>
+
+<p><strong>Acceptable cohesion</strong>:</p>
+
+<ul>
+  <li><strong>Functional cohesion</strong> (strongest and best kind): performs one and only one operation.</li>
+  <li><strong>Sequential cohesion</strong>: contains operations that must be performed in a sequential order.</li>
+  <li><strong>Communicational cohesion</strong>: contains operations that make use of the same data, but are not otherwise related.</li>
+  <li><strong>Temporal cohesion</strong>: contains operations that do several things, because all are done at the same time.</li>
+</ul>
+
+<p><strong>Unacceptable cohesion</strong>:</p>
+
+<ul>
+  <li><strong>Procedural cohesion</strong>: contains operations that must be performed in a sequential order, but don’t share the same data.</li>
+  <li><strong>Logical cohesion</strong>: several things in a routine, only one executed, depending on a flag parameter.
+(Exception - it can be  ok if using a <code class="highlighter-rouge">switch</code> statement to call one of many other (cohesive) functions.)</li>
+  <li><strong>Coincidental cohesion</strong>: no apparent reason for things to be together in a routine!</li>
+</ul>
+
+<h3 id="coupling">Coupling</h3>
+
+<blockquote>
+  <p>“The degree of coupling refers to the strength of a connection between two routines. Coupling is a complement to cohesion.” – McConnell</p>
+</blockquote>
+
+<p>Good code has <strong><em>loose coupling</em></strong> among routines.</p>
+
+<blockquote>
+  <p>“Make the coupling of routines as simple as possible.”</p>
+</blockquote>
+
+<p><strong>Criteria</strong> for evaluating coupling between routines:</p>
+
+<ul>
+  <li><strong>size</strong> (number of connections)</li>
+  <li><strong>intimacy</strong> (directness of connection; better to use direct parameter passing than indirect global variables)</li>
+  <li><strong>visibility</strong> (best if connection is obvious)</li>
+  <li><strong>flexibility</strong> (how easily you can change connections)</li>
+</ul>
+
+<p>Go for minimal interconnectedness, and make what interconnections you have simple and obvious.
+“If a program were a piece of wood, you’d try to split it with the grain.”</p>
+
+<h4 id="kinds-of-coupling">Kinds of coupling</h4>
+
+<ul>
+  <li><strong>Simple-data coupling</strong>: the only data passed from one routine to another is through parameters, and is nonstructured.</li>
+  <li><strong>Data-structure coupling</strong>: one routine passes a data structure to another; best if it really needs the whole data structure.</li>
+  <li><strong>Control coupling</strong>: one routine tells the other what to do.</li>
+  <li><strong>Global-data coupling</strong>: two routines use the same global data; may be tolerable if read-only.</li>
+  <li><strong>Pathological coupling</strong>: one routine uses the data inside the other routine. (Somewhat hard to do in C and C++.)</li>
 </ul>
 
 <blockquote>
-  <p>The <code class="highlighter-rouge">unittest</code> target is unusual in that it explicitly mentions dependency on <code class="highlighter-rouge">test.c</code>.
-Normally Make automatically recognizes the dependency between <code class="highlighter-rouge">.o</code> files and <code class="highlighter-rouge">.c</code> files, so we rarely see rules with dependency on <code class="highlighter-rouge">.c</code> files.
-Here, because there is no <code class="highlighter-rouge">unittest.c</code>, we always build <code class="highlighter-rouge">unittest</code> from <code class="highlighter-rouge">tree.c</code> with a special <code class="highlighter-rouge">-D</code> flag and do not use <code class="highlighter-rouge">tree.o</code>; we must explicitly list all the pieces that go into building <code class="highlighter-rouge">unitest</code>.</p>
+  <p>“Try to create routines that depend little on other routines.”</p>
 </blockquote>
 
-<p><strong><em>Preprocessor macros.</em></strong></p>
+<h4 id="defensive-programming">Defensive programming</h4>
 
-<p>The unit test makes heavy use of some <em>macros</em>, which are recognized and textually replaced by the C preprocessor before the C compiler even runs.
-They are so useful I’ve put them in a separate <code class="highlighter-rouge">unittest.h</code> file, and textually include them in <code class="highlighter-rouge">test.c</code> when <code class="highlighter-rouge">UNIT_TEST</code> has been defined.
-I show the core of <code class="highlighter-rouge">unittest.h</code> below.</p>
+<p>Best practices:</p>
 
-<p>These are <em>macros.</em>
-Note how I define fragments of code with each <code class="highlighter-rouge">#define</code>; the first two even take parameters.
-When scanning C code, the preprocessor does <em>textual substitution</em> for each defined symbol - it does not evaluate the code at all, it just substitutes the remainder of the line (after the symbol and after a space) into the C program wherever it sees that symbol, optionally inserting the parameter wherever it appears in the macro body.
-Because each definition must appear on one “line”, I had to use a <em>line continuation</em> character (backslash in the last character of the line) to let me format the definitions in a human-readable way.
-I lined up the backslashes so they all look neat.</p>
+<ul>
+  <li>Use assert() or other tests to insert sanity checks into your code.</li>
+  <li>Be particularly suspicious of parameters and input values that come from another module (including the user!), i.e., data that crosses a module interface.</li>
+</ul>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// each test should start by setting the result count to zero
-</span><span class="cp">#define START_TEST_CASE(name) int _failures=0; char *_testname = (name);
-</span>
-<span class="c1">// Check a condition; if false, print warning message.
-// e.g., EXPECT(dict-&gt;start == NULL).
-// note: the preprocessor 
-//   converts __LINE__ into line number where this macro was used, and
-//   converts "#x" into a string constant for arg x.
-</span><span class="cp">#define EXPECT(x)                                               \
-  if (!(x)) {                                                   \
-    _failures++;                                                \
-    printf("Fail %s Line %d: [%s]\n", _testname, __LINE__, #x); \
-  }
-</span>
-<span class="c1">// return the result count at the end of a test
-</span><span class="cp">#define END_TEST_CASE                                                   \
-  if (_failures == 0) {                                                 \
-    printf("PASS test %s\n\n", _testname);                              \
-  } else {                                                              \
-    printf("FAIL test %s with %d errors\n\n", _testname, _failures);    \
-  }
-</span>
-<span class="cp">#define TEST_RESULT (_failures)
-</span></code></pre></div></div>
+<h4 id="routine-parameters">Routine parameters</h4>
 
-<p>The preprocessor defines a special macro <code class="highlighter-rouge">__LINE__</code> that is set to the line number of the original source file, as each source line is processed; this is great for printing out the line number where our test case failed.</p>
+<p>Best practices:</p>
 
-<p>The preprocessor also has special syntax <code class="highlighter-rouge">#parameter</code> that substitutes a C string constant for the text of the parameter.
-You can see it right at the end of the <code class="highlighter-rouge">EXPECT</code> macro.
-Thus, <code class="highlighter-rouge">EXPECT(tree != NULL)</code> will produce code that ends with <code class="highlighter-rouge">"tree != NULL");</code> enabling us to print the line number <em>and</em> the condition that failed.
-You can’t do that with C, only with the preprocessor!</p>
+<ul>
+  <li>Put parameters in input-modify-output order; put “status” or “error” variables last.</li>
+  <li>Use all the parameters.</li>
+  <li>Use a consistent order among similar routines.</li>
+  <li>Document assumptions about parameters: <em>Preconditions</em> are assumptions about the parameters (or internal data-structure state) before the routine executes, and <em>postconditions</em> are assumptions about the parameters, data structure, and return value after the routine exits.</li>
+</ul>
 
-<p><em>Warning: I strongly discourage the use of preprocessor macros.</em>
-There are times, however, where they are the right tool for the job, and this is one of those times.</p>
+<h4 id="macros">Macros</h4>
 
-<p>The macros are meant to be used for constructing small unit tests like this one:</p>
+<p>You can write <em>macros</em> in C with #define - these are handled by the C preprocessor.
+Macros can be handy, on occasion, but it is usually better to use <code class="highlighter-rouge">inline</code> functions or <code class="highlighter-rouge">const</code> variables for these purposes.
+You get better syntax, type checking, and better debugger support.</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">/////////////////////////////////////
-// create and validate an empty tree
-</span><span class="kt">int</span> <span class="nf">test_newtree0</span><span class="p">()</span>
-<span class="p">{</span>
-  <span class="n">START_TEST_CASE</span><span class="p">(</span><span class="s">"newtree0"</span><span class="p">);</span>
-  <span class="n">tree_t</span> <span class="o">*</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree_new</span><span class="p">();</span>
-  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
-  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree</span><span class="o">-&gt;</span><span class="n">root</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
+<h2 id="modules">Modules</h2>
 
-  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree_find</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s">"hello"</span><span class="p">)</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
+<p>A <em>module</em> is a collection of related routines that, together, encapsulate a data structure, subsystem, or task.
+In object-oriented programming, a module is typically called a <em>class</em>.</p>
 
-  <span class="n">tree_delete</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-  <span class="n">EXPECT</span><span class="p">(</span><span class="n">count_net</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+<p>Why modules?</p>
 
-  <span class="n">END_TEST_CASE</span><span class="p">;</span>
-  <span class="k">return</span> <span class="n">TEST_RESULT</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div></div>
+<ul>
+  <li>It is sometimes necessary to have strong coupling between routines.</li>
+  <li>In that case you should group those routines into a <em>module</em>; the module has strong cohesion.</li>
+  <li>Strive for strong intra-module cohesion and loose inter-module coupling.</li>
+  <li>A well-designed module (in C) or class (in C++ or Java) encourages <em>information hiding</em>.</li>
+</ul>
 
-<p>In the above test, I create a new (empty) tree, try to find something in it, and delete the tree.
-Notice, though, that I actually peek <em>inside</em> the <code class="highlighter-rouge">struct tree</code> to verify that all its members are set correctly.</p>
+<h4 id="information-hiding">Information hiding</h4>
 
-<p>Note, too, how I used those new macros - using <code class="highlighter-rouge">START_TEST_CASE()</code> to give the test a name and initialize everything, <code class="highlighter-rouge">EXPECT()</code> to indicate the conditions I expect to be true, <code class="highlighter-rouge">END_TEST_CASE</code> to print the summary and clean up, and <code class="highlighter-rouge">return TEST_RESULT</code> to provide a return value for this function.
-Here’s how that code looks after running it through the preprocessor with <code class="highlighter-rouge">gcc -DUNIT_TEST -E tree.c</code>:</p>
+<p>A good module serves to “hide” implementation details inside the module, providing a clean abstraction and clear interface to other modules.</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">test_newtree0</span><span class="p">()</span>
-<span class="p">{</span>
-  <span class="kt">int</span> <span class="n">_failures</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="kt">char</span> <span class="o">*</span><span class="n">_testname</span> <span class="o">=</span> <span class="p">(</span><span class="s">"newtree0"</span><span class="p">);;</span>
-  <span class="n">tree_t</span> <span class="o">*</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree_new</span><span class="p">();</span>
-  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">tree</span> <span class="o">!=</span> <span class="p">((</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="mi">0</span><span class="p">)))</span> <span class="p">{</span> <span class="n">_failures</span><span class="o">++</span><span class="p">;</span> <span class="n">printf</span><span class="p">(</span><span class="s">"Fail %s Line %d: [%s]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="mi">244</span><span class="p">,</span> <span class="s">"tree != NULL"</span><span class="p">);</span> <span class="p">};</span>
-  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">tree</span><span class="o">-&gt;</span><span class="n">root</span> <span class="o">==</span> <span class="p">((</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="mi">0</span><span class="p">)))</span> <span class="p">{</span> <span class="n">_failures</span><span class="o">++</span><span class="p">;</span> <span class="n">printf</span><span class="p">(</span><span class="s">"Fail %s Line %d: [%s]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="mi">245</span><span class="p">,</span> <span class="s">"tree-&gt;root == NULL"</span><span class="p">);</span> <span class="p">};</span>
+<p>Each module programmer makes many implementation decisions, which should largely be unknown to code outside the module.
+Thus the module is</p>
 
-  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">tree_find</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s">"hello"</span><span class="p">)</span> <span class="o">==</span> <span class="p">((</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="mi">0</span><span class="p">)))</span> <span class="p">{</span> <span class="n">_failures</span><span class="o">++</span><span class="p">;</span> <span class="n">printf</span><span class="p">(</span><span class="s">"Fail %s Line %d: [%s]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="mi">247</span><span class="p">,</span> <span class="s">"tree_find(tree, </span><span class="se">\"</span><span class="s">hello</span><span class="se">\"</span><span class="s">) == NULL"</span><span class="p">);</span> <span class="p">};</span>
+<ul>
+  <li>less coupled to others,</li>
+  <li>more maintainable,</li>
+  <li>more self-testable,</li>
+  <li>more replacable,</li>
+  <li>more debuggable (can insert debugging code easily),</li>
+  <li>more reliable (can insert checks in a few places),</li>
+  <li>more understandable (hides complexity).</li>
+</ul>
 
-  <span class="n">tree_delete</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="p">((</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="mi">0</span><span class="p">));</span>
-  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">count_net</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span> <span class="p">{</span> <span class="n">_failures</span><span class="o">++</span><span class="p">;</span> <span class="n">printf</span><span class="p">(</span><span class="s">"Fail %s Line %d: [%s]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="s">"count_net() == 0"</span><span class="p">);</span> <span class="p">};</span>
+<h4 id="collaborative-work">Collaborative work</h4>
 
-  <span class="k">if</span> <span class="p">(</span><span class="n">_failures</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="n">printf</span><span class="p">(</span><span class="s">"PASS test %s</span><span class="se">\n\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">);</span> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="n">printf</span><span class="p">(</span><span class="s">"FAIL test %s with %d errors</span><span class="se">\n\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="n">_failures</span><span class="p">);</span> <span class="p">};</span>
-  <span class="k">return</span> <span class="p">(</span><span class="n">_failures</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>If you look closely, you can see the original bits of code (like <code class="highlighter-rouge">tree_delete(tree, NULL)</code> (with <code class="highlighter-rouge">NULL</code> expanded!) as well as the expanded <code class="highlighter-rouge">EXPECT</code> and other macros.</p>
-
-<p>Then the <code class="highlighter-rouge">main()</code> program runs a series of unit tests, and prints an error if any of them failed:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span>
-<span class="nf">main</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
-<span class="p">{</span>
-  <span class="kt">int</span> <span class="n">failed</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-
-  <span class="n">failed</span> <span class="o">+=</span> <span class="n">test_newtree0</span><span class="p">();</span>
-  <span class="n">failed</span> <span class="o">+=</span> <span class="n">test_newtree1</span><span class="p">();</span>
-  <span class="n">failed</span> <span class="o">+=</span> <span class="n">test_treeleft</span><span class="p">();</span>
-  <span class="n">failed</span> <span class="o">+=</span> <span class="n">test_treefind</span><span class="p">();</span>
-
-  <span class="k">if</span> <span class="p">(</span><span class="n">failed</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">printf</span><span class="p">(</span><span class="s">"FAIL %d test cases</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">failed</span><span class="p">);</span>
-    <span class="k">return</span> <span class="n">failed</span><span class="p">;</span>
-  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="n">printf</span><span class="p">(</span><span class="s">"PASS all test cases</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Here’s what the output looks like when everything passes:</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ make unit
-gcc -Wall -pedantic -std=c11 -ggdb    -c -o memory.o memory.c
-gcc -Wall -pedantic -std=c11 -ggdb  -DUNIT_TEST tree.c memory.o -o unittest
-./unittest
-PASS test newtree0
-
-PASS test newtree1
-
-PASS test treeleft
-
-  ann(1)
-   bob(2)
-    cheri(3)
- dave(4)
-PASS test treefind
-
-PASS all test cases
-</code></pre></div></div>
-
-<p>To see what it looks like when a failure occurs, I could either break the tree code (which I’d rather not do!) or break the test code; I’ll do the latter by changing one line</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree_find</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s">"abcd"</span><span class="p">)</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">);</span>
-</code></pre></div></div>
-
-<p>to</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree_find</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s">"abcd"</span><span class="p">)</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
-</code></pre></div></div>
-
-<p>and run the test again:</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ make -k unit
-gcc -Wall -pedantic -std=c11 -ggdb  -DUNIT_TEST tree.c memory.o -o unittest
-./unittest
-PASS test newtree0
-
-Fail newtree1 Line 271: [tree_find(tree, "abcd") == NULL]
-FAIL test newtree1 with 1 errors
-
-PASS test treeleft
-
-  ann(1)
-   bob(2)
-    cheri(3)
- dave(4)
-PASS test treefind
-
-FAIL 1 test cases
-make: *** [unit] Error 1
-</code></pre></div></div>
-
-<p>Notice how Make exited with error; that’s because <code class="highlighter-rouge">unittest</code> exited with non-zero status: note the code at end of <code class="highlighter-rouge">main()</code>.</p>
-
-<h2 id="cunit-test-framework">CUnit test framework</h2>
-
-<p>Although we don’t have time to study any professional frameworks, there are several C unit testing frameworks available on the Internet: <a href="https://libcheck.github.io/check/">Check</a> and <a href="http://cunit.sourceforge.net/">CUnit</a>.
-Here’s an <a href="http://cunit.sourceforge.net/example.html">example</a> using CUnit.</p>
+<p>Modules (classes) are an excellent mechanism for dividing work among programmers, because module boundaries and interfaces are clear, and there is otherwise little coupling.
+Thus, the module programmer has wide flexibility and authority on the implementation details of her module, as long as she sticks to the agreed-upon interface for the module and clearly documents the interface.</p>
 
 <h2 id="activity">Activity</h2>
 
-<p>In today’s <a href="activity.html">activity</a> your group will design a unit test for one of our other modules.</p>
-
+<p>In today’s <a href="activity.html">activity</a> your group will look at some <a href="/engs50/Notes/cohesion/example.c">example</a> code and comment on its naming, cohesion, and coupling.</p>
 
   </div>
 

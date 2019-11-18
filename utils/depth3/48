@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Labs/Lab4/REQUIREMENTS.html
+https://thayer.github.io/engs50/Notes/c1/activity.html
 3
-5030
+3621
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Labs/Lab4/REQUIREMENTS.html
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>TSE Crawler Requirements Spec</title>
+  <title>Activity - C program</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Labs/Lab4/REQUIREMENTS.html">
+  <link rel="canonical" href="/engs50/Notes/c1/activity.html">
 </head>
 
 
@@ -44,52 +44,45 @@ https://thayer.github.io/engs50/Labs/Lab4/REQUIREMENTS.html
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">TSE Crawler Requirements Spec</h1>
+    <h1 class="post-title">Activity - C program</h1>
   </header>
 
   <div class="post-content">
-    <p>The TSE crawler is a standalone program that crawls the web and retrieves webpages starting from a “seed” URL.
-It parses the seed webpage, extracts any embedded URLs, then retrieves each of those pages, recursively, but limiting its exploration to a given “depth”.</p>
+    <h2 id="goals">Goals</h2>
 
-<p>The crawler <strong>shall</strong>:</p>
+<p>To experience use of <code class="highlighter-rouge">mygcc</code> to compile C programs, to use editor to edit a C program, and to write some simple C code.</p>
 
-<ol>
-  <li>execute from a command line with usage syntax
-    <ul>
-      <li><code class="highlighter-rouge">./crawler seedURL pageDirectory maxDepth</code></li>
-      <li>where <code class="highlighter-rouge">seedURL</code> is used as the initial URL,</li>
-      <li>where <code class="highlighter-rouge">pageDirectory</code> is the pathname for an existing directory in which to write downloaded webpages, and</li>
-      <li>where <code class="highlighter-rouge">maxDepth</code> is a non-negative integer representing the maximum crawl depth.</li>
-    </ul>
+<h2 id="tasks">Tasks</h2>
+
+<ul>
+  <li>Copy the <code class="highlighter-rouge">guessprime</code> program into your own directory, and compile it:</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> ~/cs50
+cp ~cs50/examples/guessprime4.c guessprime.c
+mygcc <span class="nt">-o</span> guessprime guessprime.c
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>Try running the program a few times.</p>
   </li>
-  <li>crawl all pages reachable from <code class="highlighter-rouge">seedURL</code>, following  links to a maximum depth of <code class="highlighter-rouge">maxDepth</code>; where <code class="highlighter-rouge">maxDepth=0</code> means that crawler only explores the page at <code class="highlighter-rouge">seedURL</code>, <code class="highlighter-rouge">maxDepth=1</code> means that crawler only explores the page at <code class="highlighter-rouge">seedURL</code> and those pages to which <code class="highlighter-rouge">seedURL</code> links, and so forth inductively.</li>
-  <li>pause at least one second between page fetches.</li>
-  <li>ignore URLs that are not “internal” (meaning, outside the designated CS50 server).</li>
-  <li>write each explored page to the <code class="highlighter-rouge">pageDirectory</code> with a unique document ID, wherein
-    <ul>
-      <li>the document <code class="highlighter-rouge">id</code> starts at 1 and increments by 1 for each new page,</li>
-      <li>and the filename is of form <code class="highlighter-rouge">pageDirectory/id</code>,</li>
-      <li>and the first line of the file is the URL,</li>
-      <li>and the second line of the file is the depth,</li>
-      <li>and the rest of the file is the page content (the HTML, unchanged).</li>
-    </ul>
+  <li>
+    <p>Edit <code class="highlighter-rouge">guessprime.c</code> to add and call a new function:</p>
   </li>
-</ol>
+</ul>
 
-<blockquote>
-  <p>In a requirements spec, <strong>shall do</strong> means <strong>must do</strong>.</p>
-</blockquote>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1">// print the list of prime numbers from min to max inclusive
+</span>    <span class="kt">void</span> <span class="n">listPrimes</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">min</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">max</span><span class="p">);</span>
+</code></pre></div></div>
 
-<h4 id="be-polite">Be polite</h4>
+<p>and arrange to call it when the player gets the right answer:</p>
 
-<p>Webservers do not like crawlers (think about why).
-Indeed, it you hit a web server too hard, its operator may block your crawler based on its Internet address.
-Actually, they’ll usually block your whole domain.
-A hyperactive CS50 crawler could cause some websites to block the whole of <code class="highlighter-rouge">dartmouth.edu</code>.</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Enter a prime between 1-100: 31
+You win! here's a list of primes in [1..100]:
+2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71 73 79 83 89 97 
+</code></pre></div></div>
 
-<p>To be polite, our crawler purposely slows its behavior by introducing a delay, sleeping for one second between fetches.</p>
-
-<p>Furthermore, our crawler will limit its crawl to a specific web <a href="http://old-www.cs.dartmouth.edu">server</a> inside CS, so we don’t bother any other servers on campus or beyond.</p>
 
   </div>
 

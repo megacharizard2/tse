@@ -1,14 +1,11 @@
-https://thayer.github.io/engs50/Examples/clean
-2
-132
-#!/bin/csh -f
-set nonomatch
-set echo
-rm -f a.out
-rm -f *~
-rm -f *.o
-rm -fr *.dSYM
-foreach m (*/Makefile)
-    make -C $m:h clean
-end
+https://thayer.github.io/engs50/Reading
+3
+162
+<html>
+<head><title>301 Moved Permanently</title></head>
+<body>
+<center><h1>301 Moved Permanently</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
 

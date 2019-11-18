@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Labs/Lab3/array-allocate.html
+https://thayer.github.io/engs50/Notes/bash3/activity.html
 3
-6166
+2737
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Labs/Lab3/array-allocate.html
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Allocating an array with calloc</title>
+  <title>Activity - shell script</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Labs/Lab3/array-allocate.html">
+  <link rel="canonical" href="/engs50/Notes/bash3/activity.html">
 </head>
 
 
@@ -44,38 +44,25 @@ https://thayer.github.io/engs50/Labs/Lab3/array-allocate.html
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Allocating an array with calloc</h1>
+    <h1 class="post-title">Activity - shell script</h1>
   </header>
 
   <div class="post-content">
-    <p>We’ve seen the use of a one-dimensional array of pointers to strings, in <a href="/engs50/Examples/names3.c">names3.c</a>.
-In that case, the number of slots in the array was a constant.
-What if we don’t know that number at compile time?</p>
+    <p>Read <a href="/engs50/Examples/backup-diff.sh">backup-diff.sh</a>.</p>
 
-<p>Here’s a snippet of code to hint at how to allocate an array of <code class="highlighter-rouge">num</code> slots:</p>
+<p>What does it do?</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// the number of elements in the array
-</span><span class="kt">int</span> <span class="n">num</span> <span class="o">=</span> <span class="p">...;</span> <span class="c1">// somehow obtained; below we assume num&gt;=2
-</span><span class="p">...</span>
-<span class="c1">// array of ints
-</span><span class="kt">int</span> <span class="o">*</span><span class="n">array</span> <span class="o">=</span> <span class="n">calloc</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
-<span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+<p>Now, make a copy for yourself,</p>
 
-<span class="c1">// array of pointers to int
-</span><span class="kt">int</span> <span class="o">**</span><span class="n">array</span> <span class="o">=</span> <span class="n">calloc</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="p">));</span>
-<span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
-<span class="o">*</span><span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cp ~cs50/examples/backup-diff.sh <span class="nb">.</span>
+</code></pre></div></div>
 
-<span class="c1">// for other types, the process is analogous
-</span><span class="k">struct</span> <span class="n">foo</span> <span class="o">**</span><span class="n">array</span> <span class="o">=</span> <span class="n">calloc</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">foo</span><span class="o">*</span><span class="p">);</span>
-<span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">foo</span><span class="p">));</span>
-<span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">foomember</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span> <span class="c1">// assuming foomember is an integer member of struct foo
-</span>
-<span class="c1">// or, sometimes, you don't know how to initialize the structure
-// because it provides a 'constructor' function. first step is the same:
-</span><span class="k">struct</span> <span class="n">foo</span> <span class="o">**</span><span class="n">array</span> <span class="o">=</span> <span class="n">calloc</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">foo</span><span class="o">*</span><span class="p">);</span>
-<span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">foo_new</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span> <span class="c1">// let the constructor allocate and initialize a new foo.
-</span></code></pre></div></div>
+<p>or, to work on your laptop,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>scp username@flume.cs.dartmouth.edu:~cs50/examples/backup-diff.sh <span class="nb">.</span>
+</code></pre></div></div>
+
+<p>and modify your copy so it <strong>exits with zero status when there are no differences, and non-zero status when there are any missing backups or differing files.</strong></p>
 
   </div>
 

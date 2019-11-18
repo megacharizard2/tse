@@ -11,6 +11,7 @@
 int stillgoing;
 int pagename = 0;
 
+pthread_mutex_t copylock;
 pthread_mutex_t idlock;
 pthread_mutex_t stillgoinglock;
 pthread_mutex_t hashlock;
@@ -108,10 +109,10 @@ void qprintfn(void* elementp){
   printf("%s\n",webpage_getURL(page));
 }
 
-void deletestring(void* elementp){
+/*void deletestring(void* elementp){
   char* elemen=(char*)elementp;
   free(elemen);
-}
+	}*/
 
 void* threader(void* parameter){
 	printf("starts threader going\n");
@@ -137,8 +138,9 @@ void* threader(void* parameter){
 			}
 			bool fetchsuccess=webpage_fetch(page);
 			if (fetchsuccess != true){
-				printf("could not extract HTML from page");
+				printf("could not extract HTML from page\n");
 				webpage_delete(page);
+				printf("------------------------------------------------------------------------------------------\n");
 				continue;
 			}
 			logr("Fetched",webpage_getDepth(page),webpage_getURL(page));
@@ -180,7 +182,7 @@ void* threader(void* parameter){
 					free(result);
 				} 
 			} 
-			webpage_delete(page);
+ 			webpage_delete(page);
 		}
 		else {
 			if(isinactive == false){
@@ -228,28 +230,30 @@ int main(int argc,char* argv[]){
 		printf("Final argument must be an integer greater than 0\n");
 		return 2;
 	}
+	char* seedURLCopy = malloc(strlen(seedURL)+1);
+	strcpy(seedURLCopy,seedURL);
 	lqueue_t* lqueue = lqopen();
 	const int hashsize=50;
 	lhash_t* lhash = lhopen(hashsize);
   pthread_t thread[threads];
   int depth=atoi(argv[3]);
 	int i;
-	webpage_t* web = webpage_new(seedURL, 0, NULL);
+	webpage_t* web = webpage_new(seedURLCopy, 0, NULL);
 	if((lqget(lqueue))==NULL){          
     printf("no queue to crawl\n");                                                       
     if((lqput(lqueue,web))==0){                                 
       printf("entered base page  into queue\n");                  
     }                                                            
-    if((lhput(lhash,seedURL,seedURL,strlen(seedURL)))==0){   
+    if((lhput(lhash,seedURLCopy,seedURLCopy,strlen(seedURL)))==0){   
 			printf("entered into hash\n");      
     }                   
   } 
 	
 	/*struct params_t* param=malloc(sizeof(params_t));*/
-	params_t* param=(params_t*)malloc(sizeof(params_t));
+ 	params_t* param=(params_t*)malloc(sizeof(params_t));
 	printf("malloced\n");
 	param->depth=depth;
-	param->seedurl=seedURL;
+	param->seedurl=seedURLCopy;
 	param->dirname=pageDirectory;
 	param->lqueue=lqueue;
 	param->lhash=lhash;
@@ -272,9 +276,7 @@ int main(int argc,char* argv[]){
 		else{printf("joined thread\n");}
 	}
 	fflush(stdout);
-	free(param);
-	/*lhapply(lhash,printfn);*/
-	/*lhapply(lhash,deletestring);*/
 	lhclose(lhash);
 	lqclose(lqueue);
+	free(param);
 }

@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Labs/Lab5/
+https://thayer.github.io/engs50/Notes/memory/
 2
-21943
+13519
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Labs/Lab5/
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Lab 5 - Indexer</title>
+  <title>Memory, pointers, and malloc</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Labs/Lab5/">
+  <link rel="canonical" href="/engs50/Notes/memory/">
 </head>
 
 
@@ -44,259 +44,159 @@ https://thayer.github.io/engs50/Labs/Lab5/
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Lab 5 - Indexer</h1>
+    <h1 class="post-title">Memory, pointers, and malloc</h1>
   </header>
 
   <div class="post-content">
-    <p><strong>Due Friday, May 5, at 10pm</strong></p>
+    <p>To truly understand C, and in particular, the use of pointers, you need to understand how C programs use memory.
+These same concepts underly nearly all procedural languages, though some languages cover up the details.</p>
 
-<p>In this lab you’ll continue the Tiny Search Engine (TSE) by coding the Indexer and a program for testing a unit that saves and loads index files, according to the <a href="REQUIREMENTS.html">Indexer Requirements Spec</a>.</p>
+<!--
+***We started today with a demo of my solutions for [Lab 2](/engs50/Labs/Lab2)***.
+-->
+<!-- Terminal [script](/engs50/Notes/memory/script.txt) from today's class. -->
 
-<ul id="markdown-toc">
-  <li><a href="#preparation" id="markdown-toc-preparation">Preparation</a></li>
-  <li><a href="#assignment" id="markdown-toc-assignment">Assignment</a>    <ul>
-      <li><a href="#whatsubmit" id="markdown-toc-whatsubmit">Submission - what</a></li>
-      <li><a href="#howsubmit" id="markdown-toc-howsubmit">Submission - how</a></li>
-      <li><a href="#extensions" id="markdown-toc-extensions">Extensions</a></li>
-    </ul>
-  </li>
-  <li><a href="#hints-and-tips" id="markdown-toc-hints-and-tips">Hints and tips</a>    <ul>
-      <li><a href="#review-the-lecture-notes" id="markdown-toc-review-the-lecture-notes">Review the lecture notes</a></li>
-      <li><a href="#libcs50" id="markdown-toc-libcs50">libcs50</a></li>
-      <li><a href="#markdown" id="markdown-toc-markdown">Markdown</a></li>
-      <li><a href="#testing" id="markdown-toc-testing">Testing</a></li>
-      <li><a href="#use-valgrind-and-gdb" id="markdown-toc-use-valgrind-and-gdb">Use valgrind and gdb</a></li>
-      <li><a href="#memory-allocation" id="markdown-toc-memory-allocation">Memory allocation</a></li>
-      <li><a href="#hashtable" id="markdown-toc-hashtable">Hashtable</a></li>
-      <li><a href="#pagedirectory" id="markdown-toc-pagedirectory">pageDirectory</a></li>
-      <li><a href="#index-files" id="markdown-toc-index-files">Index files</a></li>
-      <li><a href="#makefile" id="markdown-toc-makefile">Makefile</a></li>
-    </ul>
-  </li>
-</ul>
-
-<h2 id="preparation">Preparation</h2>
-
-<ol>
-  <li>
-    <p>Start with the same Gitlab project you used for Lab 4.
-<em>Before you begin</em>, make sure you submitted Lab 4 correctly: you tagged the submitted version with <code class="highlighter-rouge">lab4submit</code>, <a href="/engs50/Labs/Lab4/#howsubmit">as instructed</a>, and pushed that tag to your Gitlab remote.</p>
-  </li>
-  <li>
-    <p>Check to ensure your local repo is clean with <code class="highlighter-rouge">make clean</code> and everything has been committed and pushed according to <code class="highlighter-rouge">git status</code>.
-If you have files that need to be committed, or commits that should be pushed, do that now.
-(oops - were those supposed to be part of your Lab 4 submission?
-See the first step above.)</p>
-  </li>
-  <li>
-    <p><strong>Do not proceed</strong> if you have uncommitted changes or unpushed commits.
-Seek help if you need to sort out your repo and Gitlab.</p>
-  </li>
-  <li>Pull the updated and additional files from the upstream master (the TSE starter kit) into your local repository:
-<code class="highlighter-rouge">git pull upstream master</code>
-(this works if you earlier followed the <a href="/05/">instructions from Section meeting</a>).
-    <blockquote>
-      <p><a href="https://gitlab.cs.dartmouth.edu/CS50/tse/compare/341328cc0ba0501a0f53eabace60a5cdbbd5b762...HEAD">Here</a> you can see the changes that will happen when you run this command - all the changes made to the starter kit since it was released.</p>
-    </blockquote>
-  </li>
-  <li>
-    <p>Commit and push your changes; perhaps tag this commit for easy reference later: <code class="highlighter-rouge">git commit -a; git tag lab5start; git push --tags</code>.</p>
-  </li>
-  <li>Check again to be sure your Gitlab repo is <strong><em>private</em></strong> (not <em>internal</em> or <em>public</em>).
-Visit your repo on Gitlab, click on <em>Settings</em>, and scroll down to <em>Project Visibility</em>.</li>
-</ol>
-
-<h2 id="assignment">Assignment</h2>
-
-<p>Write the <em>indexer</em>, second sub-system of the Tiny Search Engine.
-Please follow the <a href="/engs50/Resources/CodingStyle.html">CS50 coding style guidelines</a> and the <a href="REQUIREMENTS.html">Indexer Requirements Spec</a>, and make good use of our abstract data structures.</p>
-
-<p>Now is a good time to read Section 4 in <em><a href="/engs50/Reading/searchingtheweb.pdf">Searching the Web</a></em>, the paper about search engines.</p>
-
-<ol>
-  <li>In the <code class="highlighter-rouge">indexer</code> subdirectory, write
-    <ul>
-      <li>a program <code class="highlighter-rouge">indexer</code>;</li>
-      <li>a program <code class="highlighter-rouge">indextest</code>;</li>
-      <li>a short file <code class="highlighter-rouge">README.md</code> to provide any special information about compiling or using your indexer or indextest programs;</li>
-      <li>a file <code class="highlighter-rouge">DESIGN.md</code> to provide the Design Spec for indexer (not index tester), drawing inspiration from the <a href="/indexer/">lecture notes</a>;</li>
-      <li>a file <code class="highlighter-rouge">IMPLEMENTATION.md</code> to provide the implementation spec and testing plan for indexer (not index tester);</li>
-      <li>a file <code class="highlighter-rouge">TESTING.md</code>, telling the grader how you tested your indexer (see <a href="#testing">about testing</a> below);</li>
-      <li>a <code class="highlighter-rouge">.gitignore</code> file telling Git to ignore the binary files (libraries, executables) in this directory.</li>
-    </ul>
-  </li>
-  <li>
-    <p>Both programs shall leverage common code from <code class="highlighter-rouge">common.a</code> in the <code class="highlighter-rouge">../common</code> directory:</p>
-
-    <ul>
-      <li>a module <code class="highlighter-rouge">index.c</code> that contains all the logic for saving and loading index files (this module is common between the Indexer, Querier, and indextest);</li>
-      <li>a module <code class="highlighter-rouge">pagedir.c</code> that contains all the logic for saving pages to a crawler output directory, for loading pages from a crawler output directory (this module is common between the Crawler and Indexer);</li>
-      <li>(optionally) a module <code class="highlighter-rouge">word.c</code> that implements <code class="highlighter-rouge">NormalizeWord</code> (this module is common between the Indexer and Querier);</li>
-      <li>a <code class="highlighter-rouge">Makefile</code> that builds <code class="highlighter-rouge">common.a</code> for use by the programs;</li>
-      <li>a short <code class="highlighter-rouge">README.md</code> file explaining how to build <code class="highlighter-rouge">common.a</code>;</li>
-      <li>a <code class="highlighter-rouge">.gitignore</code> file telling Git to ignore the binary files (libraries, executables) in this directory.</li>
-    </ul>
-  </li>
-  <li>Review your top-level <code class="highlighter-rouge">README.md</code> and <code class="highlighter-rouge">Makefile</code> to update as needed.</li>
-</ol>
-
-<h3 id="whatsubmit">Submission - what</h3>
-
-<p>In this lab you shall edit or add files as described above.
-<strong><em>You must arrange your directory like ours, so we can better navigate and test your code.</em></strong>  Of course, you may have additional files - test scripts, test output, code you’ve chosen to break into multiple files.
-Here is the solution’s <a href="/engs50/Labs/Lab5/tse-tree.txt">directory structure</a>; it includes some of the optional files and some of the testing files, which may not be present in your solution.
-The point is that your code must be organized in the same <em>directory</em> structure.</p>
-
-<p><em>You shall NOT modify any of the code we provide in <code class="highlighter-rouge">libcs50</code></em>.</p>
-
-<p><em>You shall NOT include any data files produced by the crawler or indexer, or any binary/object files produced by the compiler, backup files, core dumps, etc.</em></p>
-
-<h3 id="howsubmit">Submission - how</h3>
-
-<p>When you are ready for final submission,</p>
+<h3 id="goals">Goals</h3>
 
 <ul>
-  <li><strong>Add</strong> all required files using an appropriate <code class="highlighter-rouge">git add</code> commandline.</li>
-  <li><strong>Commit</strong> all changes using an appropriate <code class="highlighter-rouge">git commit</code> commandline.</li>
-  <li><strong>Tag</strong>: <code class="highlighter-rouge">git tag lab5submit</code></li>
-  <li><strong>Push</strong>: <code class="highlighter-rouge">git push --tags</code> to ensure the tags are pushed to the remote.
-See <a href="/git/tags.html">more about tags</a>.</li>
+  <li>to recognize that all data is stored in memory, that memory is a linear sequence of bytes, and that every byte has a numeric <em>address</em>.</li>
+  <li>to understand that C stores the running program and its data in one of <em>four areas of memory</em>, each managed differently.</li>
+  <li>to learn about C syntax for pointers, addresses, and dereferencing.</li>
+  <li>to begin to explore dynamic memory allocation.</li>
 </ul>
 
-<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="highlighter-rouge">lab5submit</code> and the files associated with that tagged commit include everything we’ll need to grade your lab.</p>
+<h3 id="slides-and-examples">Slides and examples</h3>
 
-<p>We grade the version tagged <code class="highlighter-rouge">lab5submit</code> so it is safe for you to continue work (e.g., so you can start work on Lab 6), even if you commit or push.</p>
+<p>Today I used a brief set of slides (in <a href="/engs50/Notes/memory/memory-pointers-C.key">Keynote</a> or <a href="/engs50/Notes/memory/memory-pointers-C.pdf">PDF</a>) to explain memory, addresses, and pointers, complementing the notes below.
+The slides reference several examples:</p>
 
-<p>We will clone your repo at 0h, 24h, 48h, and 72h after the original deadline.
-We will start grading when we first see one with tag <code class="highlighter-rouge">lab5submit</code>, and judge it late if that tag was added after the deadline.
-To avoid confusion, <em>please blitz the team <code class="highlighter-rouge">cs50 AT cs.dartmouth.edu</code> if you want a late submission to be graded instead of your on-time submission.</em></p>
+<ul>
+  <li><a href="/engs50/Examples/pointer0.c">pointer0.c</a></li>
+  <li><a href="/engs50/Examples/pointer1.c">pointer1.c</a></li>
+  <li><a href="/engs50/Examples/pointer2.c">pointer2.c</a></li>
+  <li><a href="/engs50/Examples/pointer3.c">pointer3.c</a></li>
+</ul>
 
-<p><strong><em>Your entire codebase must compile with <code class="highlighter-rouge">make</code> from the top-level directory and produce no compiler warnings.</em></strong>  If we find that your code will not compile, or has <strong>segmentation faults</strong>, we will send it back to you as soon as we can for repair; recall the <a href="/#crashes">grading policy</a>.</p>
+<h1 id="memory-and-addresses">Memory, and addresses</h1>
 
-<p>We will run your indexer on our own set of test data.</p>
+<p>Every bit of information the computer needs must be stored somewhere in memory - whether instructions or data.
+The computer’s memory is a sequence of bytes, each byte with its own numeric <em>address</em>.
+If the computer has one megabyte of memory, these 2^20 bytes will be numbered from 0 to 2^20-1, that is, from 0 to 1,048,575.
+Or, since we’re computer scientists, we work in hexadecimal rather than decimal; the bytes are numbered from 00000 to FFFFF.
+In practice, we tend to write hexadecimal numbers in C notation: 0x00000 to 0xFFFFF.</p>
 
-<p>We will run <code class="highlighter-rouge">valgrind</code> on your program to look for memory leaks; you will lose points for memory leaks or memory errors.</p>
+<p>Given a variable, we can use a C operator <code class="highlighter-rouge">&amp;</code> to get its address.
+You might read this operator as “address of…”.</p>
 
-<h3 id="extensions">Extensions</h3>
-
-<p>If you want to claim your extension, create a file <code class="highlighter-rouge">EXTENSION</code> at the top-level directory of your repository.
-Don’t forget to <code class="highlighter-rouge">git push</code> <em>(before the deadline!)</em> so we will see the file.
-For example,</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>touch EXTENSION
-<span class="nv">$ </span>git add EXTENSION
-<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"extension request"</span>
-<span class="nv">$ </span>git tag lab5submit     <span class="c"># add tag, as above</span>
-<span class="nv">$ </span>git push <span class="nt">--tags</span>        <span class="c"># push to gitlab, including tags</span>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+<span class="kt">int</span><span class="o">*</span> <span class="n">xp</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>
 </code></pre></div></div>
 
-<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="highlighter-rouge">lab5submit</code> and that its files include <code class="highlighter-rouge">EXTENSION</code>.</p>
+<p>The first variable <code class="highlighter-rouge">x</code> is an integer.
+The second variable <code class="highlighter-rouge">xp</code> is a pointer to an integer, and it is initialized to the address in memory where <code class="highlighter-rouge">x</code> is stored.</p>
 
-<p>When you are ready to submit your code, remove <code class="highlighter-rouge">EXTENSION</code> as follows, <em>update your submission tag</em>, and push to Gitlab:</p>
+<blockquote>
+  <p>By the way, the <code class="highlighter-rouge">NULL</code> pointer is simply address zero (0x00000).
+The OS arranges for that memory segment to be illegal for reading or for writing, so if you try to dereference a null pointer for reading or writing (think <code class="highlighter-rouge">char *p=NULL; char c = *p;</code>) the OS will catch it and trigger a ‘segmentation fault’.</p>
+</blockquote>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git rm EXTENSION
-<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"ready for grading"</span>
-<span class="nv">$ </span>git push <span class="nt">--delete</span> origin lab5submit <span class="c"># remove the tag from remote</span>
-<span class="nv">$ </span>git tag <span class="nt">-f</span> lab5submit  <span class="c"># move the local tag forward to this commit</span>
-<span class="nv">$ </span>git push <span class="nt">--tags</span>        <span class="c"># push to gitlab remote, including tags</span>
+<p>When you run your program, it becomes a <em>process</em> within Unix.
+(To see a list of all your processes, type <code class="highlighter-rouge">ps</code> at the bash commandline.
+To see <em>all</em> the processes running on the system, try <code class="highlighter-rouge">ps ax</code>.)  Your program’s executable code is copied into memory so the processor can read the instructions and execute them.
+This region is often called the <em>code segment</em> or <em>text segment</em>).</p>
+
+<p>Let’s focus on data, which live in the other three segments.</p>
+
+<h2 id="three-regions-of-data-memory">Three regions of data memory</h2>
+
+<p>C stores all of the data your program manipulates in three distinct regions of memory (aka <em>segments</em>).
+There’s nothing special about each region - they’re all somewhere in that linear sequence of bytes - but C manages each differently.
+Let’s look at each in turn.</p>
+
+<h3 id="global-memory-aka-static">Global memory (aka static)</h3>
+
+<p>The simplest region is called ‘global’ (or ‘static’) storage, and it’s where global variables live.
+If you define a constant or variable outside of any function, it has</p>
+
+<ul>
+  <li><em>global scope</em> - meaning that it is visible to all code in any function within the current file, and</li>
+  <li><em>static storage</em> - meaning that C allocates space for it (and initializes the contents) before the program begins executing; its address will never change throughout the execution of the program (hence the name ‘static’).</li>
+</ul>
+
+<p>For example,</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">const</span> <span class="kt">float</span> <span class="n">pi</span><span class="o">=</span><span class="mi">3</span><span class="p">.</span><span class="mi">1415926535</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">char</span> <span class="n">usage</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"Usage: dog [-n] [-m mapfile] [-] [filename]...</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">error_count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="p">...</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
-<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="highlighter-rouge">lab5submit</code>, that its files do <em>not</em> include <code class="highlighter-rouge">EXTENSION</code>, and its files include everything we’ll need to grade your lab.</p>
+<p>The above declares three global variables, two of which are constants and one of which is variable.
+All are visible to functions defined below their declaration.
+Global variables are always declared at the top of a C file, after <code class="highlighter-rouge">#include</code> directives and before any function definitions.</p>
 
-<h2 id="hints-and-tips">Hints and tips</h2>
+<p>Global variables can be handy, and sometimes necessary, but it is good style to avoid use of global variables.
+(Global constants are generally ok.)  Well-modularized programs keep their data close - passing the data (or pointers to data) among functions.</p>
 
-<h3 id="review-the-lecture-notes">Review the lecture notes</h3>
+<p>There are two kinds of ‘global’ in C: global within a C file, and global across all C files in the program.
+The former are reasonable, if used carefully, but the latter are more dangerous.
+We’ll discuss the differences later, if we have time.</p>
 
-<p>There are some design tips in the <a href="/indexer/">lecture notes</a>.
-This week’s <a href="/engs50/Reading/#week-6">reading</a> is great too!</p>
+<h3 id="the-stack-for-local-variables">The Stack (for local variables)</h3>
 
-<h3 id="libcs50">libcs50</h3>
+<p>All of the example code we’ve seen so far makes extensive use of local variables; these variables are defined within a function and have</p>
 
-<p>We provide several modules in the <code class="highlighter-rouge">libcs50</code> directory, which compiles to a library <code class="highlighter-rouge">libcs50.a</code> you can link with your indexer.
-<em>You should not change any of our code.</em>
-You may drop in your <code class="highlighter-rouge">set.[ch]</code>, <code class="highlighter-rouge">counters.[ch]</code>, <code class="highlighter-rouge">hashtable.[ch]</code> files from Lab 3.
-If you’d prefer to use our version of <em>set</em>, <em>counters</em>, and <em>hashtable</em>, that’s totally fine; the starter kit includes a pre-compiled library you can use instead; see <code class="highlighter-rouge">libcs50/README.md</code>.</p>
+<ul>
+  <li><em>local scope</em> - meaning that the variable is visible within the function only, and</li>
+  <li><em>stack storage</em> - meaning that C allocates space for the variable within the stack frame for this particular instance of this function call.</li>
+</ul>
 
-<p>Most of the modules in this directory are documented with a corresponding Markdown file.</p>
+<p><strong>Note:</strong> Local variables include the function’s parameters.</p>
 
-<h3 id="markdown">Markdown</h3>
+<p>Think about how a stack works.
+When the program starts, C allocates a chunk of bytes on the stack to hold all the variables defined in <code class="highlighter-rouge">main</code>.
+This chunk is called a ‘stack frame’.
+<em>It does not initialize these bytes</em> - the program must initialize variables, either in the variable definition or in the code to follow.
+Later, when <code class="highlighter-rouge">main</code> calls another function, say, <code class="highlighter-rouge">readline</code>, it allocates another chunk of bytes on the stack (you could say, it <em>pushes another frame on the stack</em>) to hold the variables defined by <code class="highlighter-rouge">readline </code>.
+When <code class="highlighter-rouge">readline</code> calls <code class="highlighter-rouge">fgetc</code>, it pushes another stack frame on the stack, a chunk of bytes to hold the variables defined within <code class="highlighter-rouge">fgetc</code>.
+When <code class="highlighter-rouge">fgetc</code> returns, it <em>pops the frame off the stack</em>.
+When <code class="highlighter-rouge">readline</code> returns, it pops that frame off the stack.
+The local variables defined in <code class="highlighter-rouge">readline </code> are not just syntactically inaccessible to <code class="highlighter-rouge">main</code> (out of scope), their memory is no longer allocated.
+Indeed, when <code class="highlighter-rouge">main</code> calls another function, say, <code class="highlighter-rouge">printf</code>, a stack frame is pushed on to the stack for <code class="highlighter-rouge">printf</code>, re-using the same memory that had been allocated to <code class="highlighter-rouge">readline </code> and <code class="highlighter-rouge">fgetc</code>).</p>
 
-<p>In this and subsequent labs, you must provide documentation files in Markdown format, that is, you should supply <code class="highlighter-rouge">README.md</code>, <code class="highlighter-rouge">DESIGN.md</code>, <code class="highlighter-rouge">IMPLEMENTATION.md</code>, and <code class="highlighter-rouge">TESTING.md</code>.
-The Markdown syntax provides very simple (and readable) markup for headings, lists, italics, bold, and code snippets.
-(This course website is written in Markdown.) See <a href="/engs50/Resources/#markdown">Markdown resources</a>.</p>
+<h3 id="the-heap-dynamically-allocated-memory">The Heap (dynamically allocated memory)</h3>
 
-<h3 id="testing">Testing</h3>
+<p>The third kind of data memory is called the “heap”.
+It is a large region of memory managed by <code class="highlighter-rouge">malloc()</code>.
+Each call to <code class="highlighter-rouge">malloc()</code> selects a chunk of bytes from the heap region, and returns a pointer to that chunk.
+It keeps careful records of which chunks have been allocated, and which are free.
+It is the programmer’s responsibility to, eventually, return unused chunks by calling <code class="highlighter-rouge">free(p)</code> where <code class="highlighter-rouge">p</code> is a pointer earlier returned by <code class="highlighter-rouge">malloc</code>.
+If the programmer forgets to call <code class="highlighter-rouge">free</code>, that chunk can never be reused, and eventually <code class="highlighter-rouge">malloc</code> will run out of free chunks to be allocated.
+(This situation is called a ‘memory leak.’)   It is also the programmer’s responsibility not to call <code class="highlighter-rouge">free</code> multiple times for the same pointer; doing so may corrupt the records kept by the memory-allocation library, and will likely lead to program crashes.</p>
 
-<p>If your crawler never quite worked, never fear!
-You do not need a working crawler to write or test your indexer.
-Try your indexer on the crawler’s output, which is in <code class="highlighter-rouge">~cs50/demo/crawler-output/</code>.</p>
+<p>There are four related functions you should understand:</p>
 
-<p>We recommend that you write a bash script to execute your indexer; you might run that script from a <code class="highlighter-rouge">make test</code> target.
-Your <code class="highlighter-rouge">TESTING.md</code> file can name the script and describe what it does.</p>
+<ul>
+  <li><code class="highlighter-rouge">p = malloc(n)</code> - allocates <code class="highlighter-rouge">n</code> bytes of heap memory</li>
+  <li><code class="highlighter-rouge">p = calloc(count, size)</code> allocates <code class="highlighter-rouge">count*size</code> bytes of heap memory</li>
+  <li><code class="highlighter-rouge">p = realloc(p, n)</code> - where <code class="highlighter-rouge">p</code> is a pointer to heap memory - expands (or shrinks) its allocation to <code class="highlighter-rouge">n</code> bytes.</li>
+  <li><code class="highlighter-rouge">free(p)</code> - where <code class="highlighter-rouge">p</code> is a pointer to heap memory - releases that portion of heap memory for future use.</li>
+</ul>
 
-<p>Because some of our data-structure implementations have unspecified ordering – the order in which data appears when traversing the structure may not be the same as the order items were inserted – the file saved by the index tester may not be literally identical to the file read by that program.
-We provide an <a href="/engs50/Labs/Lab5/indexsort.awk"><code class="highlighter-rouge">indexsort.awk</code></a>  script that sorts the index file into a ‘canonical’ ordering, making it possible to compare two index files for their content.</p>
+<p>Check out this <a href="https://www.youtube.com/watch?v=5VnDaHBi8dM">animated explanation of pointers</a>.
+Fun!</p>
 
-<p>Note that <code class="highlighter-rouge">TESTING.md</code> is different from the ‘Testing plan’, which is a short high-level description written before you code.
-<code class="highlighter-rouge">TESTING.md</code> contains (or refers to) results from the tests.
-It may refer to other files that contain input to or output from your test runs, or scripts to run the tests; they need not be copied into this file.
-(Indeed, your file will be much more readable if you don’t fill it with long scripts or output!)</p>
+<h3 id="on-exit">On exit</h3>
 
-<h3 id="use-valgrind-and-gdb">Use valgrind and gdb</h3>
+<p>When the process exits, all its memory is released - the four segments (code, global, stack, and heap) disappear.</p>
 
-<p>In <a href="/debug/">Lecture</a> we learned how to use <code class="highlighter-rouge">valgrind</code> and <code class="highlighter-rouge">gdb</code>; make use of them.</p>
+<h3 id="activity">Activity</h3>
 
-<h3 id="memory-allocation">Memory allocation</h3>
-
-<p>You may find the <code class="highlighter-rouge">memory.c</code> module useful.
-Its use is optional, but it is ready to use as part of library <code class="highlighter-rouge">libcs50.a</code>.</p>
-
-<p>In our Lab3 we tried to recover gracefully from memory-allocation failures.
-In the TSE application programs, we’ll be a bit more lazy: on NULL return from malloc/calloc you can print an error and exit with non-zero exit status.
-(You may find the <code class="highlighter-rouge">assertp()</code> function, defined by the <code class="highlighter-rouge">memory</code> module, to be useful here.)</p>
-
-<h3 id="hashtable">Hashtable</h3>
-
-<p>“How big should the hashtable be?”</p>
-
-<p>In the indexer/querier, we use a hashtable to store an inverted index (words –&gt; documents), and thus the hashtable is keyed by words.
-The answer to the above question, then, depends on how many words will be in the index.</p>
-
-<p>When building the inverted index, it’s impossible to know in advance how many words you will find in all those pages encountered by the crawler.
-Pick a reasonable size, perhaps something in the range of 200..900 slots.</p>
-
-<p>When loading an inverted index from a file, though, you <em>can</em> know how many words… because there is one word per line in the index file, and it’s easy to count the number of lines (see <code class="highlighter-rouge">file.c</code>).
-Once your code can obtain the number of words, think about how it can compute a good size for your hashtable.</p>
-
-<h3 id="pagedirectory">pageDirectory</h3>
-
-<p>Recall that the Crawler fills a directory with saved pages; in Lab 4 we recommended that you also create and leave a file <code class="highlighter-rouge">.crawler</code> in the page directory.
-If you followed that advice, you now have a great opportunity!
-You might include a function <code class="highlighter-rouge">isCrawlerDirectory(char *dir)</code> in your <code class="highlighter-rouge">pagedir</code> module, which can easily verify whether <code class="highlighter-rouge">dir</code> is indeed a Crawler-produced directory.
-If it can open a file <code class="highlighter-rouge">dir/.crawler</code> for reading, then <code class="highlighter-rouge">dir</code> is a Crawler-produced directory; if not, either the <code class="highlighter-rouge">dir</code> is not a valid pathname, not a directory, not a readable directory, it’s not a Crawler produced directory, or some other error - all easily caught by this simple test.</p>
-
-<h3 id="index-files">Index files</h3>
-
-<p>To read each line of the index file, it works well to read the word, then loop calling <code class="highlighter-rouge">fscanf</code> with format <code class="highlighter-rouge">"%d %d "</code> to pull off one pair at a time, checking the return value of <code class="highlighter-rouge">fscanf</code>.</p>
-
-<p>To write the index file, use the <code class="highlighter-rouge">_iterate</code> methods built into your data structures.
-(Indeed you may need to have iterators call iterators!) Do <em>not</em> use your <code class="highlighter-rouge">_print</code> methods for this purpose; those are meant for producing pretty human-readable output for debugging purposes.</p>
-
-<p>The functions found in <code class="highlighter-rouge">file.c</code> should be helpful.</p>
-
-<h3 id="makefile">Makefile</h3>
-
-<p>Your <code class="highlighter-rouge">indexer/Makefile</code> needs to build both <code class="highlighter-rouge">indexer</code> and <code class="highlighter-rouge">indextest</code>.
-It may be most convenient to add a phony top-most rule:</p>
-
-<div class="language-make highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">all</span><span class="o">:</span> <span class="nf">indexer indextest</span>
-</code></pre></div></div>
-
-<p>so that <code class="highlighter-rouge">make</code> or <code class="highlighter-rouge">make all</code> will build both programs; if you want to build just one, run <code class="highlighter-rouge">make indexer</code> or <code class="highlighter-rouge">make indextest</code>.</p>
-
-<p>You may also find it useful to add phony rules so you can <code class="highlighter-rouge">make test</code> or <code class="highlighter-rouge">make valgrind</code>.</p>
-
-<p>Good luck!</p>
+<p>Today’s <a href="activity.html">activity</a> looks at a program that copies a string - and tries to find a bug.</p>
 
   </div>
 

@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Resources/Homebrew.html
+https://thayer.github.io/engs50/Resources/gitlab-ssh.html
 2
-4917
+7226
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Resources/Homebrew.html
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Homebrew installation</title>
+  <title>Gitlab with SSH</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Resources/Homebrew.html">
+  <link rel="canonical" href="/engs50/Resources/gitlab-ssh.html">
 </head>
 
 
@@ -44,49 +44,76 @@ https://thayer.github.io/engs50/Resources/Homebrew.html
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Homebrew installation</h1>
+    <h1 class="post-title">Gitlab with SSH</h1>
   </header>
 
   <div class="post-content">
-    <p>MacOS users are lucky because they get all the grace of a graphical interface with a large ecosystem of applications to make their computer productive, <em>plus they have access to the full power of Unix under the hood.</em>
-Apple includes a lot of the core Unix commands and utilities, by default, but some of the commands you’ll need (or want) in this course need to be added.
-Some of these can be installed through the Apple developer’s tool (<code class="highlighter-rouge">Xcode</code>), but lots of great open-source software needs to be installed separately.</p>
+    <p>In CS50 we use the Git revision-control system, and specifically, our own <a href="http://gitlab.cs.dartmouth.edu">Gitlab</a> server.
+Connections between Gitlab and your computer - whether that be your laptop, or one of the CS Linux servers - are conducted over a secure connection, either using the <strong>HTTPS</strong> or <strong>SSH</strong> protocols.
+Although it takes a little bit more set-up effort, SSH is the preferred choice and we find that it works better for students once it is set up.</p>
 
-<p>The easiest way to install open-source software is through a ‘package manager’ (Linux users are likely already familiar with this concept!).
-There are several package managers for MacOS, but I like the one called <em><a href="http://brew.sh">Homebrew</a></em>.
-It’s easy to install and easy to use for installing other tools.</p>
+<h3 id="instructions">Instructions</h3>
 
-<p>To get started, open a <code class="highlighter-rouge">Terminal</code> window and a browser window.
-In your browser, visit the <em><a href="http://brew.sh">Homebrew</a></em> site; copy the one-line command near the top of the page.</p>
+<ol>
+  <li>Visit <a href="http://gitlab.cs.dartmouth.edu">Gitlab</a> and click on your personal icon in the upper-right corner; pick <em>Settings</em> from the pop-up menu.</li>
+  <li>Click on <em>SSH Keys</em> in the list of panes across the top.</li>
+  <li>Log in to your account on the CS Linux server.</li>
+  <li>Check to see whether you already have an ssh key.
+If so, it lives in the <code class="highlighter-rouge">.ssh</code> subdirectory of your home directory.
+Try <code class="highlighter-rouge">cat ~/.ssh/id_rsa.pub</code>.
+If you have a key, it will print out.
+If not, you’ll get an error <code class="highlighter-rouge">No such file or directory</code>.
+4.
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">cat</span> ~/.ssh/id_rsa.pub
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDY035+DErTm2wKVK9OFgwpyGRjkEMXHyNPZ6gHmb+SQEmljyGwcJB6mQWIQZrII59m427gP81nvR3COD1iMH9SG67+odMlc4TL4959zkGJ7ycL8wmyLq1V7CTyE8mN0oYXD6YBve6C+38BAxdz5H2KWwem/45uwtJz8a5oIpVT6QY7clY2qinD8VCO6IUi4WBCFINYbp6PtV12bJYID8LMOShpljm4oyD3RFt4Ht+85/N2yCBLHydMO25MfLDxlIYav9Ky3S8LT+aojfb96W54h3r9YKG2KD/JQGnBzcZVTYPrFlEa2rLBUwqVo5ZjbKi9P/+HmtDAJOxrD+3038sV dfk@topdog.cs.dartmouth.edu
+</code></pre></div>    </div>
+  </li>
+  <li>If you do <em>not</em> have an ssh key, generate one:
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-keygen -t rsa -C "YourUsername@cs.dartmouth.edu" -b 4096
+</code></pre></div>    </div>
+    <p>then try <code class="highlighter-rouge">cat ~/.ssh/id_rsa.pub</code>.</p>
+  </li>
+  <li>Use your mouse to select the whole output of <code class="highlighter-rouge">cat</code>. Copy it to your clipboard.</li>
+  <li>Go back to your browser - still at the <em>SSH Keys</em> page on Gitlab - and paste your clipboard into that big box.</li>
+  <li>Click the <em>Add Key</em> button.</li>
+  <li>You should now use the SSH-style URL when cloning repos from Gitlab.
+If you’d already cloned a repo with the HTTPS-style URL, see below.</li>
+</ol>
 
-<p><img src="/engs50/Resources/Homebrew0.png" alt="homepage" /></p>
+<p>Whenever you <code class="highlighter-rouge">git pull</code> or <code class="highlighter-rouge">git push</code> or other operations that involve the remote, you will need to enter the passphrase you provided when you generated the ssh keypair – <em>not</em> your Gitlab password – because you need to give <code class="highlighter-rouge">ssh</code> permission to use your private key to authenticate yourself to the remote Gitlab server.</p>
 
-<blockquote>
-  <p>Notice that it simply asks you to copy and paste a complex command into the <code class="highlighter-rouge">Terminal</code>.
-You should never blindly copy-paste shell commands without understanding what the command will do to your computer!
-In this case, the Homebrew page explains what it will do, and you’re hearing it from me - this is a safe tool to install.
-As far as I know. ;-)</p>
-</blockquote>
+<h3 id="macos-users">MacOS users</h3>
 
-<p>Switch to <code class="highlighter-rouge">Terminal</code> and paste in that command.
-The installation will download some files and start running.</p>
+<p>If you use a MacOS laptop and want to be able to clone from Gitlab repos to your Mac, copy your ssh keys to your laptop.</p>
 
-<p>If you’ve never run any of the ‘developer’-oriented commands (like <code class="highlighter-rouge">gcc</code> or <code class="highlighter-rouge">make</code>) on your Mac before, you may see a popup like the following:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>scp YourUsername@flume.cs.dartmouth.edu:.ssh/id_rsa     ~/.ssh/
+<span class="nv">$ </span>scp YourUsername@flume.cs.dartmouth.edu:.ssh/id_rsa.pub ~/.ssh/
+</code></pre></div></div>
 
-<p><img src="/engs50/Resources/Homebrew1.png" alt="Xcode popup" /></p>
+<h3 id="switching-from-https-to-ssh">Switching from HTTPS to SSH</h3>
 
-<p>Click ‘Install’ to let Xcode do its thing.
-It may be a large download.
-This installer downloads all the command-line tools from Apple and installs them on your Mac.
-You’ll need these tools, and so does Homebrew.</p>
+<p>If you already cloned a repo using the HTTPS-style URL and now want to use the SSH method, set up for SSH first, as above.
+Then <code class="highlighter-rouge">cd</code> to the directory holding your clone.
+You should see something like this.</p>
 
-<p>When that completes, press Return in the Terminal window to allow the Homebrew installation to complete.
-Then you can install new packages with a command line <code class="highlighter-rouge">brew install</code> followed by the package name (Homebrew actually calls them “formulas”).
-You can search for package names with <code class="highlighter-rouge">brew search</code>.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git remote <span class="nt">-v</span>
+origin	https://dfkotz@gitlab.cs.dartmouth.edu/dfkotz/demonstration.git <span class="o">(</span>fetch<span class="o">)</span>
+origin	https://dfkotz@gitlab.cs.dartmouth.edu/dfkotz/demonstration.git <span class="o">(</span>push<span class="o">)</span>
+</code></pre></div></div>
 
-<p>Later, periodically, you should <code class="highlighter-rouge">brew update</code> and then <code class="highlighter-rouge">brew upgrade</code> to keep all your software up to date.
-I do this about once a month.</p>
+<p>Visit your repo’s home page on Gitlab and find the box that holds the URL.
+Click the pop-up next to that box, and choose SSH.
+Copy the URL to your clipboard, and tell Git to set that URL as your <code class="highlighter-rouge">origin</code> instead:</p>
 
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git remote set-url origin git@gitlab.cs.dartmouth.edu:dfkotz/demonstration.git
+<span class="nv">$ </span>git remote <span class="nt">-v</span>
+origin	git@gitlab.cs.dartmouth.edu:dfkotz/demonstration.git <span class="o">(</span>fetch<span class="o">)</span>
+origin	git@gitlab.cs.dartmouth.edu:dfkotz/demonstration.git <span class="o">(</span>push<span class="o">)</span>
+</code></pre></div></div>
+
+<h3 id="more-help">More help</h3>
+
+<p>See the <a href="https://gitlab.cs.dartmouth.edu/help/ssh/README">Gitlab SSH help</a>.</p>
 
   </div>
 

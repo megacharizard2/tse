@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/modules/
+https://thayer.github.io/engs50/Labs/Lab6/
 2
-15384
+25108
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/modules/
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Modular data structures in C</title>
+  <title>Lab 6 - Querier</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/modules/">
+  <link rel="canonical" href="/engs50/Labs/Lab6/">
 </head>
 
 
@@ -44,156 +44,280 @@ https://thayer.github.io/engs50/Notes/modules/
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Modular data structures in C</h1>
+    <h1 class="post-title">Lab 6 - Querier</h1>
   </header>
 
   <div class="post-content">
-    <p>In this class we focus on the design of reusable modules for common data structures.</p>
+    <p><strong>Due Friday, May 12, at 10pm</strong></p>
 
-<h3 id="goals">Goals</h3>
+<p>In this lab you’ll continue the Tiny Search Engine (TSE) by coding the Querier according to the <a href="REQUIREMENTS.html">Querier Requirements Spec</a>.</p>
 
-<ul>
-  <li>Understanding the importance of reusable modules.</li>
-  <li>Reiterating the use of header files to enable modules.</li>
-  <li>Reiterating <code class="highlighter-rouge">struct</code> and introducing <code class="highlighter-rouge">typedef</code>.</li>
-  <li>General-purpose data structures with <code class="highlighter-rouge">void*</code>.</li>
-  <li>Function pointers.</li>
+<ul id="markdown-toc">
+  <li><a href="#preparation" id="markdown-toc-preparation">Preparation</a></li>
+  <li><a href="#assignment" id="markdown-toc-assignment">Assignment</a>    <ul>
+      <li><a href="#whatsubmit" id="markdown-toc-whatsubmit">Submission - what</a></li>
+      <li><a href="#howsubmit" id="markdown-toc-howsubmit">Submission - how</a></li>
+      <li><a href="#extensions" id="markdown-toc-extensions">Extensions</a></li>
+    </ul>
+  </li>
+  <li><a href="#grading" id="markdown-toc-grading">Grading</a></li>
+  <li><a href="#hints" id="markdown-toc-hints">Hints and tips</a>    <ul>
+      <li><a href="#review-the-lecture-notes" id="markdown-toc-review-the-lecture-notes">Review the lecture notes</a></li>
+      <li><a href="#hashtable" id="markdown-toc-hashtable">Hashtable</a></li>
+      <li><a href="#parsing-queries" id="markdown-toc-parsing-queries">Parsing queries</a></li>
+      <li><a href="#combining-results" id="markdown-toc-combining-results">Combining results</a></li>
+      <li><a href="#ranking-results" id="markdown-toc-ranking-results">Ranking results</a></li>
+      <li><a href="#testing" id="markdown-toc-testing">Testing your querier</a></li>
+      <li><a href="#chopping" id="markdown-toc-chopping">Chopping a string into array of strings</a></li>
+      <li><a href="#ctype" id="markdown-toc-ctype">ctype</a></li>
+    </ul>
+  </li>
 </ul>
 
-<h2 id="modularity-and-reuse">Modularity and reuse</h2>
+<h2 id="preparation">Preparation</h2>
 
-<p>Some data structures are so common that it is valuable to code them once - lists, queues, stacks, trees, and hash tables - and then re-use that code for multiple programs (or multiple purposes within a program).
-Code re-use saves time because you don’t need to write everything from scratch.
-By using robust, well-tested modules rather than fresh (buggy) code, your program is more reliable.
-Finally, by separating ‘business logic’ from ‘data structures’, you the code is clearer and more flexible (e.g., if you later want to switch to a more-efficient data structure you can do so without rewriting all the business logic).</p>
+<ol>
+  <li>
+    <p>Start with the same Gitlab project you used for Labs 4-5.
+<em>Before you begin</em>, make sure you submitted Lab 5 correctly: you tagged the submitted version with <code class="highlighter-rouge">lab5submit</code>, <a href="/engs50/Labs/Lab5/#howsubmit">as instructed</a>, and pushed that tag to your Gitlab remote.</p>
+  </li>
+  <li>
+    <p>Check to ensure your local repo is clean with <code class="highlighter-rouge">make clean</code> and everything has been committed and pushed according to <code class="highlighter-rouge">git status</code>.
+If you have files that need to be committed, or commits that should be pushed, do that now.
+(oops - were those supposed to be part of your Lab 5 submission? See the first step above.)</p>
+  </li>
+  <li>
+    <p><strong>Do not proceed</strong> if you have uncommitted changes or unpushed commits.
+Seek help if you need to sort out your repo and Gitlab.</p>
+  </li>
+  <li>Pull the updated and additional files from the upstream master (the TSE starter kit) into your local repository:
+<code class="highlighter-rouge">git pull upstream master</code>
+(this works if you earlier followed the <a href="/05/">instructions from Section meeting</a>).
+    <blockquote>
+      <p><a href="https://gitlab.cs.dartmouth.edu/CS50/tse/compare/341328cc0ba0501a0f53eabace60a5cdbbd5b762...HEAD">Here</a> you can see the changes that will happen when you run this command - all the changes made to the starter kit since it was released.</p>
+    </blockquote>
+  </li>
+  <li>
+    <p>Commit and push your changes; perhaps tag this commit for easy reference later: <code class="highlighter-rouge">git commit -a; git tag lab6start; git push --tags</code>.</p>
+  </li>
+  <li>Check again to be sure your Gitlab repo is <strong><em>private</em></strong> (not <em>internal</em> or <em>public</em>).
+Visit your repo on Gitlab, click on <em>Settings</em>, and scroll down to <em>Project Visibility</em>.</li>
+</ol>
 
-<p>Object-oriented languages make this easier, because they make it simple to define a ‘class’ of objects and then to create new ‘instances’ as needed.
-Many such languages go further by providing ‘templates’ and ‘subclasses’ as a way to derive new variants of the base class.</p>
+<h2 id="assignment">Assignment</h2>
 
-<p>C has none of these capabilities.
-But we can approximate some of these concepts through good style and careful design.</p>
+<p>Write the <em>querier</em>, third sub-system of the Tiny Search Engine.
+Please follow the <a href="/engs50/Resources/CodingStyle.html">CS50 coding style guidelines</a> and the <a href="REQUIREMENTS.html">Querier Requirements Spec</a>, and make good use of our abstract data structures.</p>
 
-<h3 id="pointers-to-anything">Pointers to anything</h3>
+<ol>
+  <li>In the <code class="highlighter-rouge">querier</code> subdirectory, write
+    <ul>
+      <li>a program <code class="highlighter-rouge">querier</code>;</li>
+      <li>a <code class="highlighter-rouge">Makefile</code> to build <code class="highlighter-rouge">querier</code>;</li>
+      <li>a short file <code class="highlighter-rouge">README.md</code> to provide any special information about compiling or using your querier;</li>
+      <li>a file <code class="highlighter-rouge">DESIGN.md</code> to provide the Design Spec for querier, drawing inspiration from the <a href="/indexer/">lecture notes</a>;</li>
+      <li>a file <code class="highlighter-rouge">IMPLEMENTATION.md</code> to provide the implementation spec and testing plan for querier;</li>
+      <li>a file <code class="highlighter-rouge">TESTING.md</code>, telling the grader how you tested your querier (see <a href="#testing">about testing</a> below);</li>
+      <li>a <code class="highlighter-rouge">.gitignore</code> file telling Git to ignore the binary files (libraries, executables) in this directory.</li>
+    </ul>
+  </li>
+  <li>Your program shall leverage common code from <code class="highlighter-rouge">common.a</code> in the <code class="highlighter-rouge">../common</code> directory:
+    <ul>
+      <li>a module <code class="highlighter-rouge">index.c</code> that contains all the logic for saving and loading index files (this module is common between the Indexer, Querier, and indextest);</li>
+      <li>a module <code class="highlighter-rouge">pagedir.c</code> that contains all the logic for saving pages to a crawler output directory, for loading pages from a crawler output directory (this module is common between the Crawler and Indexer);</li>
+      <li>(optionally) a module <code class="highlighter-rouge">word.c</code> that implements <code class="highlighter-rouge">NormalizeWord</code> (this module is common between the Indexer and Querier);</li>
+      <li>a <code class="highlighter-rouge">Makefile</code> that builds <code class="highlighter-rouge">common.a</code> for use by the programs;</li>
+      <li>a short <code class="highlighter-rouge">README.md</code> file explaining how to build <code class="highlighter-rouge">common.a</code>;</li>
+      <li>a <code class="highlighter-rouge">.gitignore</code> file telling Git to ignore the binary files (libraries, executables) in this directory.</li>
+    </ul>
+  </li>
+  <li>Review your top-level <code class="highlighter-rouge">README.md</code> and <code class="highlighter-rouge">Makefile</code> to update as needed.</li>
+</ol>
 
-<p>In developing a general-purpose data-structure module, we would really like the module to be able to store arbitary “things” – not just predetermined types – but anything.
-For example, instead of a linked-list of strings (as we built in the <code class="highlighter-rouge">names</code> program) we’d like a linked-list that could store pointers to anything.
-Today we want a list of string things; tomorrow we might want a list of <code class="highlighter-rouge">struct student</code> things.</p>
+<h3 id="whatsubmit">Submission - what</h3>
 
-<p>The solution is for the module to store <em>pointers to things</em>, rather than the things themselves.
-The user’s contract with the module is thus “I allocate and initialize a thing, and give you a pointer to remember; later, when I need that thing, I’ll ask and you give me back that pointer.
-When I ask you to print things, or delete things, I’ll give you customized functions that know how to print and delete things of this type.”</p>
+<p>In this lab you shall edit or add files as described above.
+<strong><em>You must arrange your directory like ours, so we can better navigate and test your code.</em></strong>  Of course, you may have additional files - test scripts, test output, code you’ve chosen to break into multiple files.
+Here is the solution’s <a href="/engs50/Labs/Lab5/tse-tree.txt">directory structure</a>; it includes some of the optional files and some of the testing files, which may not be present in your solution.
+The point is that your code must be organized in the same <em>directory</em> structure.</p>
 
-<p>Java and other object-oriented languages do this with <em>templates</em>.
-C has no suport for templates, but it does have a type for “pointer to anything”:  <code class="highlighter-rouge">void*</code>.
-Thus,</p>
+<p><em>You shall NOT modify any of the code we provide in <code class="highlighter-rouge">libcs50</code></em>.</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">char</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="s">"hello"</span><span class="p">;</span>	   <span class="c1">// pointer to a char, in this case, a string
-</span><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span> <span class="o">*</span><span class="n">xp</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>  <span class="c1">// pointer to an int
-</span><span class="k">struct</span> <span class="n">student</span> <span class="o">*</span> <span class="n">sp</span><span class="p">;</span>   <span class="c1">// pointer to a struct
-</span><span class="n">sp</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">student</span><span class="p">));</span> <span class="c1">// initialize the pointer
-</span><span class="n">sp</span><span class="o">-&gt;</span><span class="n">name</span> <span class="o">=</span> <span class="s">"David"</span><span class="p">;</span>  <span class="c1">// initialize the struct at that pointer
-</span><span class="n">sp</span><span class="o">-&gt;</span><span class="n">house</span> <span class="o">=</span> <span class="s">"West"</span><span class="p">;</span>  <span class="c1">// ...initialize
-</span><span class="n">sp</span><span class="o">-&gt;</span><span class="n">class</span> <span class="o">=</span> <span class="mi">1986</span><span class="p">;</span>    <span class="c1">// ...initialize
-</span>
-<span class="kt">void</span> <span class="o">*</span><span class="n">anything</span><span class="p">;</span>       <span class="c1">// a pointer to any type
-</span><span class="n">anything</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>         <span class="c1">// here, a pointer to a char on the stack
-</span><span class="n">anything</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>        <span class="c1">// here, a pointer to an int on the stack
-</span><span class="n">anything</span> <span class="o">=</span> <span class="n">sp</span><span class="p">;</span>        <span class="c1">// here, a pointer to a struct in the heap
-</span></code></pre></div></div>
+<p><em>You shall NOT include any data files produced by the crawler or indexer, or any binary/object files produced by the compiler, backup files, core dumps, etc.</em></p>
 
-<p>Thus, our modules will accept and store <code class="highlighter-rouge">void*</code> pointers, and return them to the caller when asked.</p>
+<h3 id="howsubmit">Submission - how</h3>
 
-<h3 id="pointers-to-functions">Pointers to functions</h3>
-
-<p>As noted above, the module may need help when it needs to print, compare, or delete “things”.
-The module’s user must provide the module with special helper functions.
-(In an object-oriented language, like Java, “things” are objects and objects know how to print themselves, compare themselves, or delete themselves.
-C has no such support.)</p>
-
-<p>Thus, the caller may pass a function to the module, when needed.
-We can’t actually pass the function - we have to pass the module a pointer to the function.</p>
-
-<p>The concept of a <em>pointer to a function</em> can be confusing.
-Like any other pointer, it is an address in memory.
-Recall that the compiled code of the program lives in the code segment, in memory, so every function resides at some address.
-A function pointer is simply that address.</p>
-
-<p>We can refer to the function’s address simply by naming the function, without the syntax of calling a function.
-That is, <code class="highlighter-rouge">foo</code> is a function pointer, whereas <code class="highlighter-rouge">foo(a, b, c)</code> calls that function and passes arguments <code class="highlighter-rouge">a</code>, <code class="highlighter-rouge">b</code>, and <code class="highlighter-rouge">c</code>.
-In our <a href="/engs50/Examplespointer2.c}}">pointer2.c</a> example, we passed the address of functions <code class="highlighter-rouge">main</code> and <code class="highlighter-rouge">change</code> to <code class="highlighter-rouge">printf</code> so it could print those addresses for us to examine.</p>
-
-<p>If I have a function called <code class="highlighter-rouge">myprint</code>, like this:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">myprint</span><span class="p">(</span><span class="kt">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">item</span><span class="p">)</span>
-<span class="p">{</span>
-	<span class="kt">int</span> <span class="o">*</span><span class="n">valuep</span> <span class="o">=</span> <span class="n">item</span><span class="p">;</span> <span class="c1">// in this case, the "things" are integers
-</span>	<span class="n">fprintf</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="s">"(%s, %d)"</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="o">*</span><span class="n">valuep</span><span class="p">);</span> <span class="c1">// note *valuep derefs pointer
-</span><span class="p">}</span>
-</code></pre></div></div>
-
-<p>If I have a function pointer <code class="highlighter-rouge">printfunc</code>, I can initialize the function pointer and call through that pointer as follows:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">printfunc</span> <span class="o">=</span> <span class="n">myprint</span><span class="p">;</span>
-<span class="p">(</span><span class="o">*</span><span class="n">printfunc</span><span class="p">)(</span><span class="n">fp</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">thing</span><span class="p">);</span>
-</code></pre></div></div>
-
-<p>In other words, I dereference the pointer to get a function, and then call that function.
-Notice the <code class="highlighter-rouge">*</code> and parens, <code class="highlighter-rouge">(*printfunc)</code>.</p>
-
-<p>How would I declare that variable <code class="highlighter-rouge">printfunc</code>?
-pretty gnarly syntax:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">printfunc</span><span class="p">)(</span><span class="kt">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
-</code></pre></div></div>
-
-<p>declares variable <code class="highlighter-rouge">printfunc</code> to be a pointer to a function whose prototype looks like that of <code class="highlighter-rouge">myprint</code> above, that is, it takes the given three arguments and returns <code class="highlighter-rouge">void</code>.
-Indeed, it looks almost like a common function prototype, except for that <code class="highlighter-rouge">(*variablename)</code> notation.
-For this pointer to be useful, it must be initialized to the address of a function.</p>
-
-<h2 id="example---bags">Example - bags</h2>
-
-<p>Today we live-code a <em>bag</em> data structure and use it to make a bag version of our <code class="highlighter-rouge">names</code> series.
-A <em>bag</em> is an unordered collection of (items).
-The bag starts empty, grows as the caller adds one item at a time, and shrinks as the caller extracts one item at a time.
-It could be empty, or could contain hundreds of items.
-Items are indistinguishable, so the <em>extract</em> function is free to return any item from the bag.</p>
-
-<p>We start from <a href="/engs50/Examples/names5.c">names5.c</a> and modify it with the goal of coding functions that manipulate a generic “bag of things”.</p>
-
-<p>The first example demonstrates</p>
+<p>When you are ready for final submission,</p>
 
 <ul>
-  <li>structure types (like <code class="highlighter-rouge">struct bag_t</code> and <code class="highlighter-rouge">struct bagnode_t</code>).</li>
-  <li>typedefs to create new type names.</li>
-  <li>Heap memory (created via <code class="highlighter-rouge">malloc</code> in <code class="highlighter-rouge">bag_new</code>).</li>
-  <li>The use of pointers to build and manipulate a bag data structure.</li>
-  <li>The use of <code class="highlighter-rouge">void*</code> to represent “a pointer to anything” and its use to build a bag of generic things.</li>
-  <li>A reminder that strings - even constant strings, in double quotes - are stored in memory as arrays of characters and referenced by a <code class="highlighter-rouge">char*</code> pointer to their first character; thus even a constant string has an address and is passed as a pointer.</li>
+  <li><strong>Add</strong> all required files using an appropriate <code class="highlighter-rouge">git add</code> commandline.</li>
+  <li><strong>Commit</strong> all changes using an appropriate <code class="highlighter-rouge">git commit</code> commandline.</li>
+  <li><strong>Tag</strong>: <code class="highlighter-rouge">git tag lab6submit</code></li>
+  <li><strong>Push</strong>: <code class="highlighter-rouge">git push --tags</code> to ensure the tags are pushed to the remote.
+See <a href="/git/tags.html">more about tags</a>.</li>
 </ul>
 
-<p>We extend the example to split the bag functions out as to a separate set of files, demonstrating</p>
+<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="highlighter-rouge">lab6submit</code> and the files associated with that tagged commit include everything we’ll need to grade your lab.</p>
+
+<p>We will clone your repo at 0h, 24h, 48h, and 72h after the original deadline.
+We will start grading when we first see one with tag <code class="highlighter-rouge">lab6submit</code>, and judge it late if that tag was added after the deadline.
+To avoid confusion, <em>please blitz the team <code class="highlighter-rouge">cs50 AT cs.dartmouth.edu</code> if you want a late submission to be graded instead of your on-time submission.</em></p>
+
+<p><strong><em>Your entire codebase must compile with <code class="highlighter-rouge">make</code> from the top-level directory and produce no compiler warnings.</em></strong>  If we find that your code will not compile, or has <strong>segmentation faults</strong>, we will send it back to you as soon as we can for repair; recall the <a href="/#crashes">grading policy</a>.</p>
+
+<p>We will run your querier on our own set of test data.</p>
+
+<p>We will run <code class="highlighter-rouge">valgrind</code> on your program to look for memory leaks; you will lose points for memory leaks or memory errors.</p>
+
+<h3 id="extensions">Extensions</h3>
+
+<p>If you want to claim your 24h extension, create a file <code class="highlighter-rouge">EXTENSION</code> at the top-level directory of your repository.
+Don’t forget to <code class="highlighter-rouge">git push</code> <em>(before the deadline!)</em> so we will see the file.
+For example,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>touch EXTENSION
+<span class="nv">$ </span>git add EXTENSION
+<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"extension request"</span>
+<span class="nv">$ </span>git tag lab6submit     <span class="c"># add tag, as above</span>
+<span class="nv">$ </span>git push <span class="nt">--tags</span>        <span class="c"># push to gitlab, including tags</span>
+</code></pre></div></div>
+
+<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="highlighter-rouge">lab6submit</code> and that its files include <code class="highlighter-rouge">EXTENSION</code>.</p>
+
+<p>When you are ready to submit your code, remove <code class="highlighter-rouge">EXTENSION</code> as follows, <em>update your submission tag</em>, and push to Gitlab:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git rm EXTENSION
+<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"ready for grading"</span>
+<span class="nv">$ </span>git push <span class="nt">--delete</span> origin lab6submit <span class="c"># remove the tag from remote</span>
+<span class="nv">$ </span>git tag <span class="nt">-f</span> lab6submit  <span class="c"># move the local tag forward to this commit</span>
+<span class="nv">$ </span>git push <span class="nt">--tags</span>        <span class="c"># push to gitlab remote, including tags</span>
+</code></pre></div></div>
+
+<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="highlighter-rouge">lab6submit</code>, that its files do <em>not</em> include <code class="highlighter-rouge">EXTENSION</code>, and its files include everything we’ll need to grade your lab.</p>
+
+<h2 id="grading">Grading</h2>
+
+<p>Lab 6 is scored on the basis of 100 points, with Delivery, Documentation, Style, Testing comprising most of the points.</p>
+
+<p>“Functionality” represents 40/100 points.
+In recognition that you might find it best to start simple and slowly enhance your solution as you get the simpler version working, you can earn points as follows:</p>
 
 <ul>
-  <li>a <em>module</em>, which is as close as we get to a <em>class</em> in C.</li>
-  <li>A set of functions exported via <code class="highlighter-rouge">bag.h</code> to other C files.</li>
-  <li>Public types (like <code class="highlighter-rouge">struct bag_t</code>) - and opaque types.</li>
-  <li>Private types (like <code class="highlighter-rouge">struct bagnode_t</code>).</li>
-  <li>Private functions (like <code class="highlighter-rouge">bagnode_new</code>).</li>
-  <li>No need for global variables.  (We always try to avoid them!)</li>
+  <li>10 points if your querier prints the set of documents that contain all the words in the query; you may treat operators (‘and’, ‘or’) as regular words.</li>
+  <li>20 points if your querier also supports ‘and’ and ‘or’ operators, but without precedence (in mathematical terms, it treats them as <em>left associative, equal precedence</em> operators).</li>
+  <li>30 points if your querier also supports ‘and’ precedence over ‘or’.</li>
+  <li>40 points if your querier also prints the document set in decreasing order by score, thus meeting the full specs.</li>
 </ul>
 
-<p>The result, after some cleanup, is <a href="/engs50/Examples/names9.c">names9.c</a>.</p>
+<p>Partial credit is available, of course, per the judgement of the grader, but above is the coarse-grain rubric.</p>
 
-<p>A complete <em>bag</em> module is included in the <a href="/engs50/Labs/Lab3/starter">Lab 3 starter kit</a>.</p>
+<h2 id="hints">Hints and tips</h2>
 
-<h2 id="another-example---binary-trees">Another example - binary trees</h2>
+<p>Processing a query and ranking the results are tricky.
+We encourage you to start with a simplified case, test it thoroughly, then enhance.
+Easier to code, to test, and to debug, and when facing a deadline it’s nice to have a less-functional program that works than a full-functional program that doesn’t work.
+See the above section on <a href="#grading">Grading</a> regarding the points allocated as you achieve higher levels of functionality.</p>
 
-<p>For a more complex example, demonstrating the use of binary trees as a “dictionary” data structure – that is, one that stores (key,item) pairs – study the <a href="/engs50/Examples/trees">binary-tree module</a>.</p>
+<h3 id="review-the-lecture-notes">Review the lecture notes</h3>
 
-<h2 id="activity">Activity</h2>
+<p>There are some examples and design tips in the <a href="/querier/">lecture notes</a>.</p>
 
-<p>In today’s class <a href="activity.html">activity</a>, we add a counter to track the number of items in the bag.</p>
+<h3 id="hashtable">Hashtable</h3>
 
+<p>How big should your hashtable be?
+Well, you can know how many words it will store - because the index file has one word per line, and you can count the number of lines in the index file before creating an index data structure and before loading the file into the structure.
+Just think about how the hash-table size (in slots) might relate to the number of words it will need to store.</p>
+
+<h3 id="parsing-queries">Parsing queries</h3>
+
+<p>We strongly recommend that your code read the entire query (a line of input) into a single string, then <em>tokenize</em> the query string.
+That is, you should write a function that takes a string and builds an array of words; it should use white space (space or tab) as the delimiter; each word can be normalized (lower-cased) and checked for illegal characters before being added to the array.
+See <a href="#chopping">one approach</a> at bottom.</p>
+
+<p>Now that all the character-by-character parsing is behind you, and you have an array of words, you can step through the array to print a <em>clean query</em>, that is, with no extraneous spaces and all letters in lower case.</p>
+
+<p>You can then step through the array according to the structure defined in the BNF.
+Two tips:</p>
+
+<ul>
+  <li>Validate the basic structure: neither the first or last word may be an operator, and two operators may not be adjacent.
+If valid, proceed to next step; otherwise print a suitable error message.</li>
+  <li>Structure your code to follow the structure of the grammar, which has two non-terminals (<code class="highlighter-rouge">query</code> and <code class="highlighter-rouge">andsequence</code>), to write a function that handles each.
+    <ul>
+      <li>One function to return set of documents that satisfy an <code class="highlighter-rouge">andsequence</code>, looping over words; accumulate an answer (like a running product) as you go.</li>
+      <li>Another function to return set of documents that satisfy a <code class="highlighter-rouge">query</code>, looping over calls to the above function for each <code class="highlighter-rouge">andsequence</code>; accumulate an answer (like a running total) as you go.</li>
+    </ul>
+  </li>
+</ul>
+
+<blockquote>
+  <p>See <a href="/querier/index.html#expressions">Lecture notes</a> for more hints about how this might work.</p>
+</blockquote>
+
+<h3 id="combining-results">Combining results</h3>
+
+<p>Suppose you have one <code class="highlighter-rouge">counters</code> object representing the set of documents in which a given word appears, and another <code class="highlighter-rouge">counters</code> object representing the set of documents in which another word appears; each counter set is really a set of (docID, count) pairs.
+How do you combine them?
+Recall <a href="/iterators/">Lecture</a>.</p>
+
+<p>If you are processing <code class="highlighter-rouge">wordA AND wordB</code>, the set of documents that match <em>both</em> words is the <em>intersection</em> of the two sets, and the score for each document (per the specs) is the <em>minimum</em> of the count for each document.
+So you need a way to intersect two <code class="highlighter-rouge">counters</code>; we recommend iterating over one set and, for each item, checking whether that document exists in the other set; update the first set according to what you find.
+You can use <code class="highlighter-rouge">counters_iterate</code>, <code class="highlighter-rouge">counters_get</code>, and <code class="highlighter-rouge">counters_set</code> to do this, without modifying your <code class="highlighter-rouge">counters</code> module.</p>
+
+<p>If you are processing <code class="highlighter-rouge">wordA OR wordB</code>, the set of documents that match <em>either</em> word is the <em>union</em> of the two sets, and the score for each document (per the definition above) is the <em>sum</em> of the count for each document.
+So you need a way to union two <code class="highlighter-rouge">counters</code>; we recommend iterating over the second set and, for each item, checking whether that document exists in the first set; update the first set according to what you find.
+Again, you can use <code class="highlighter-rouge">counters_iterate</code>, <code class="highlighter-rouge">counters_get</code>, and <code class="highlighter-rouge">counters_set</code> to do this, without modifying your <code class="highlighter-rouge">counters</code> module.</p>
+
+<p>While processing an <code class="highlighter-rouge">andsequence</code> you can compute a ‘running product’, that is, a <code class="highlighter-rouge">counters</code> object that represents the intersection of everything seen so far in the sequence.</p>
+
+<p>When processing a query, that is, a disjunction of <code class="highlighter-rouge">andsequence</code> results, you can similarly compute a ‘running sum’, that is, a <code class="highlighter-rouge">counters</code> object that represents the union of everything seen so far in the sequence.</p>
+
+<h3 id="ranking-results">Ranking results</h3>
+
+<p>After parsing and interpreting a query, you will likely have a <code class="highlighter-rouge">counters</code> object representing the score for each satisfying document.
+The <code class="highlighter-rouge">counters</code> module does not have a ‘sort’ method or a way to iterate over the items in sorted order.
+We suggest you use  <code class="highlighter-rouge">counters_iterate()</code> in which the <code class="highlighter-rouge">itemfunc</code> inserts the items into a new array of structs, each struct representing one satisfying document (docID, score).
+Use <code class="highlighter-rouge">counters_iterate</code> twice - once to count the number of items in the set so you can allocate an appropriate-sized array, and again to stuff each item into the new array.
+If your <code class="highlighter-rouge">itemfunc</code> uses an insertion-sort approach to drop the new item into the array so the array is sorted in decreasing-score order, you end the iteration with a nicely sorted array of structs.
+Then you can simply loop over the array to print out the list of documents.</p>
+
+<h3 id="testing">Testing your querier</h3>
+
+<p>Your querier reads queries from stdin, one per line.
+You can test it interactively, but to do thorough and repeated testing you can write a collection of little files, each of which contains one or more queries to your querier, and run commands like <code class="highlighter-rouge">./querier &lt; testquery</code>.
+You might write a short bash script to run the querier through several such test files.
+That script might even compare the output to known-good output, for regression testing.</p>
+
+<p>You are welcome (but not required) to use the <code class="highlighter-rouge">fuzzquery.c</code>, provided in the updated starter kit, for testing your querier.
+Again, you might write a short bash script and/or Makefile rules to help you run tests using this program.
+<em>If you choose to use this program, you will need to change the <code class="highlighter-rouge">-std</code> switch in the <code class="highlighter-rouge">CFLAGS</code> definition in your <code class="highlighter-rouge">Makefile</code> as follows</em></p>
+
+<div class="language-make highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">CFLAGS</span> <span class="o">=</span> <span class="nt">-Wall</span> <span class="nt">-pedantic</span> <span class="nt">-std</span><span class="o">=</span>gnu11 <span class="nt">-ggdb</span> <span class="nv">$(FLAGS)</span> <span class="nt">-I</span><span class="nv">$C</span> <span class="nt">-I</span><span class="nv">$L</span>
+</code></pre></div></div>
+
+<p>If your indexer never quite worked, never fear.
+You do not need a working indexer to write or test your querier.
+Try your querier on the indexer’s output, in <code class="highlighter-rouge">~cs50/data/tse-output/</code>.</p>
+
+<h3 id="chopping">Chopping a string into array of strings</h3>
+
+<p>Here’s a nice trick for breaking a single string <code class="highlighter-rouge">char* line</code> into an array of strings <code class="highlighter-rouge">char* words[]</code>.
+In the example below, the query has two words, and there are leading spaces, separating spaces, and trailing space, terminated by a null.
+Because in C a “string” is just a pointer to an array of characters terminated by a null <code class="highlighter-rouge">\0</code> character, we can chop this single string into multiple strings by replacing two of the spaces with nulls, and recording a pointer to the beginning of each word.
+We don’t need to allocate any memory for these new strings, or copy these strings - they stay right where they are.</p>
+
+<p><img src="/engs50/Labs/Lab6/query-chopping.png" alt="diagram of Chopping a string into array of strings" /></p>
+
+<p>To make this happen, think about sliding two pointers along the array, starting at <code class="highlighter-rouge">line</code>.
+One pointer might be <code class="highlighter-rouge">char* word</code> and you slide it over to the first non-space; the other pointer might be <code class="highlighter-rouge">char* rest</code> and you slide it from <code class="highlighter-rouge">word</code> to the first non-letter.
+Squash that character <code class="highlighter-rouge">*rest</code> with a null, and you’ve created a null-terminated string starting at <code class="highlighter-rouge">word</code>.</p>
+
+<p><em>Think carefully</em> about the edge cases, as you construct the loops and slide the pointers.</p>
+
+<h3 id="ctype">ctype</h3>
+
+<p>You may find the functions <code class="highlighter-rouge">isalpha()</code> and <code class="highlighter-rouge">isspace()</code> useful; read the man page.
+They are from the <code class="highlighter-rouge">ctype.h</code> package.</p>
 
   </div>
 
