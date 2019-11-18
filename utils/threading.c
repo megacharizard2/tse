@@ -44,19 +44,19 @@ bool isdir(char *c){
   char *pathname=strcat(dircopy,filename);
   FILE *fp;
   fp=fopen(pathname,"w");
-	printf("file opened");
+	printf("file opened\n");
   if (fp== NULL){
     free(dircopy);
-		printf("messing up the if");
+		printf("messing up the if\n");
     return false;
   }
   else{
     fclose(fp);
     free(dircopy);
-		printf("messing up the else");
+		printf("messing up the else\n");
     return true;
   }
-	printf("gets through");
+	printf("gets through\n");
   return true;
 }
 
@@ -76,7 +76,7 @@ int32_t pagesaver(webpage_t *page,int id,char* dirname){
   FILE* fp;
   fp=fopen(path,"w");
   if (fp == NULL){
-    printf("the file pointer is NULL");
+    printf("the file pointer is NULL\n");
     return 1;
   }
   char *URL=webpage_getURL(page);
@@ -114,6 +114,7 @@ void deletestring(void* elementp){
 }
 
 void* threader(void* parameter){
+	printf("starts threader going\n");
 	bool isinactive = false;
 	params_t* param = (params_t*)parameter;
 	char* seedURL = param->seedURL;
@@ -124,12 +125,19 @@ void* threader(void* parameter){
   webpage_t *web = webpage_new(urlcopy, 0, NULL); 
   lqueue_t *tocrawl=param->lqueue; 
 	lhash_t* seenURLs=param->lhash;
+	printf("housekeeping done with\n");
 	if(lqget(tocrawl)==NULL){
-		lqput(tocrawl,web);
-		lhput(seenURLs,urlcopy,urlcopy,strlen(urlcopy));
+		printf("no queue to crawl\n");
+		if((lqput(tocrawl,web))==1){
+			printf("entered base page  into queue\n");
+		}
+		if((lhput(seenURLs,urlcopy,urlcopy,strlen(urlcopy)))==1){
+				printf("entered into hash\n");
+		}
 	}
   webpage_t* page;
   while (stillgoing != 0){
+		printf("enters big dog loop\n");
 		if ((page = lqget(tocrawl)) != NULL) {
 			if(isinactive==true){
 				pthread_mutex_lock(&stillgoinglock);
@@ -200,7 +208,7 @@ void* threader(void* parameter){
 int main(int argc,char* argv[]){
 	printf("in main\n");
   if (argc != 5){
-    printf("There must be 5 arguments");
+    printf("There must be 5 arguments\n");
     printf("usage: crawler <seedurl><pagedir> <maxdepth>\n");
     return 1;
   }
@@ -211,9 +219,8 @@ int main(int argc,char* argv[]){
     printf("usage: crawler <seedurl><pagedir> <maxdepth>\n");
     return 2;
   }
-	printf("the page directory is %s",argv[2]);
+	printf("the page directory is %s\n",argv[2]);
   char* pageDirectory=argv[2];
-	printf("ikgh");
   bool dir=isdir(pageDirectory);
 	printf("isdir fine");
 	if (dir == false){
@@ -221,12 +228,12 @@ int main(int argc,char* argv[]){
     printf("usage: crawler <seedurl><pagedir> <maxdepth>\n");
     return 1;
   }
-	printf("pagedir fine");
+	printf("pagedir fine\n");
 	int threads=atoi(argv[4]);
-	printf("made thread");
+	printf("made thread\n");
 	stillgoing=threads;
 	if (threads == 0) {
-		printf("Final argument must be an integer greater than 0");
+		printf("Final argument must be an integer greater than 0\n");
 		return 2;
 	}
 	lqueue_t* lqueue = lqopen();
@@ -237,23 +244,31 @@ int main(int argc,char* argv[]){
 	int i;
 	/*struct params_t* param=malloc(sizeof(params_t));*/
 	params_t* param=(params_t*)malloc(sizeof(params_t));
-	printf("malloced");
+	printf("malloced\n");
 	param->depth=depth;
 	param->seedURL=seedURL;
 	param->dirname=pageDirectory;
 	param->lqueue=lqueue;
 	param->lhash=lhash;
-	printf("made struct");
+	printf("made struct\n");
 	for (i=0; i<threads; i++) {
-		printf("trying to make thread");
-		pthread_create(&thread[i], NULL,threader,(void *)param);
-		printf("made thread");
-	}
+		printf("trying to make thread\n");
+		if((pthread_create(&thread[i], NULL,threader,(void *)param))!=0){
+			printf("failed to make thread\n");
+		}
+		else{
+		printf("made thread\n");
+		}
+ 	}
+	printf("gets out of making threads\n");
 	int j;
 	for (j=0; j<threads; j++) {
-		pthread_join(thread[j],NULL);
-		printf("joined thread");
-  }
+		if((pthread_join(thread[j],NULL))!=0){
+		printf("failed to join thread\n");
+		}
+		else{printf("joined thread\n");}
+	}
+	fflush(stdout);
 	lhapply(lhash,printfn);
 	lhapply(lhash,deletestring);
 	lhclose(lhash);

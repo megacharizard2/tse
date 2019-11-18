@@ -44,15 +44,16 @@ int32_t lqput(lqueue_t *lqp, void *elementp) {
 	else{
 		toReturn=0;
 	}
-	return toReturn;
 	pthread_mutex_unlock(&m);
+	return toReturn;
 }
 
 void* lqget(lqueue_t *lqp) {
 	pthread_mutex_lock(&m);
 	lqueue_s* lqueue = (lqueue_s*)lqp;
-	return qget(lqueue->q);
+	void* item = lqget(lqueue->q);
 	pthread_mutex_unlock(&m);
+	return item;
 }
 
 void lqapply(lqueue_t *lqp, void (*fn)(void* elementp)) {
