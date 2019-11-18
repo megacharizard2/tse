@@ -122,21 +122,9 @@ void* threader(void* parameter){
 	int maxdepth = param->depth;
 	char* urlcopy = assertp(malloc(strlen(seedURL)+1), "url copy\n");
   strcpy(urlcopy,seedURL);
-  webpage_t *web = webpage_new(urlcopy, 0, NULL); 
   lqueue_t *tocrawl=param->lqueue; 
 	lhash_t* seenURLs=param->lhash;
 	printf("housekeeping done with\n");
-	lqget(tocrawl);
-	printf("value is \n");
-	if((lqget(tocrawl))==NULL){
-		printf("no queue to crawl\n");
-		if((lqput(tocrawl,web))==0){
-			printf("entered base page  into queue\n");
-		}
-		if((lhput(seenURLs,urlcopy,urlcopy,strlen(urlcopy)))==0){
-				printf("entered into hash\n");
-		}
-	}
   webpage_t* page;
   while (stillgoing != 0){
 		printf("enters big dog loop\n");
@@ -244,6 +232,17 @@ int main(int argc,char* argv[]){
   pthread_t thread[threads];
   int depth=atoi(argv[3]);
 	int i;
+	webpage_t* web = webpage_new(seedURL, 0, NULL);
+	if((lqget(lqueue))==NULL){          
+    printf("no queue to crawl\n");                                                       
+    if((lqput(lqueue,web))==0){                                 
+      printf("entered base page  into queue\n");                  
+    }                                                            
+    if((lhput(lhash,seedURL,seedURL,strlen(seedURL)))==0){   
+			printf("entered into hash\n");      
+    }                   
+  } 
+	
 	/*struct params_t* param=malloc(sizeof(params_t));*/
 	params_t* param=(params_t*)malloc(sizeof(params_t));
 	printf("malloced\n");
@@ -271,8 +270,10 @@ int main(int argc,char* argv[]){
 		else{printf("joined thread\n");}
 	}
 	fflush(stdout);
+	free(param);
 	lhapply(lhash,printfn);
 	lhapply(lhash,deletestring);
 	lhclose(lhash);
 	lqclose(lqueue);
+	webpage_delete(web);
 }
